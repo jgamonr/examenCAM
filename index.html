@@ -2,76 +2,3540 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="3; url=https://forms.gle/DKdsQZqrMqzBqob77" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bienvenida - Examen CAM</title>
+  <title>Control de ingreso a evento</title>
   <style>
-    * {
-      box-sizing: border-box;
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #0f172a;
+      --primary-text: #ffffff;
+      --soft: #f1f5f9;
+      --selected: #e2e8f0;
+      --danger: #b91c1c;
     }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 14px;
+    }
+    h1 { margin: 0 0 6px; font-size: 28px; }
+    p.lead { margin: 0 0 16px; color: var(--muted); }
+    .grid-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .sticky-top-panel {
+      position: sticky;
+      top: 0;
+      z-index: 9000;
+      background: rgba(248, 250, 252, .96);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(226, 232, 240, .95);
+      padding: 8px 0 10px;
+      margin: 0 0 16px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
+    }
+    .sticky-top-panel .grid-summary {
+      grid-template-columns: minmax(59px, .5fr) minmax(59px, .5fr) repeat(2, minmax(118px, 1fr)) !important;
+      gap: 8px;
+      margin-bottom: 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px;
+    }
+    .sticky-top-panel .grid-summary .card {
+      min-width: 118px;
+    }
+    .sticky-top-panel .grid-summary .card.summary-half {
+      min-width: 59px;
+    }
+    .sticky-top-panel .grid-summary .card.summary-half .inner {
+      padding-left: 6px;
+      padding-right: 6px;
+    }
+    .sticky-top-panel .grid-summary .card.summary-half .muted {
+      font-size: 9px;
+      letter-spacing: -.02em;
+    }
+    .sticky-top-panel .grid-summary .card.summary-half .big {
+      font-size: 16px;
+    }
+    .sticky-top-panel .grid-summary .inner {
+      padding: 8px 10px;
+    }
+    .sticky-top-panel .grid-summary .muted {
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .sticky-top-panel .grid-summary .big {
+      font-size: 18px;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+    .sticky-top-panel .tabs {
+      margin-bottom: 0;
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .sticky-top-panel .tabs button {
+      white-space: nowrap;
+      padding: 8px 12px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    .card .inner { padding: 16px; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .big { font-size: 26px; font-weight: 700; }
+    .tabs, .subtabs {
+      display: inline-flex;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 6px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    button {
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+    }
+    button:focus,
+    button:focus-visible {
+      background: #f59e0b;
+      color: #111827;
+      border-color: #b45309;
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, .28);
+      transform: translateY(-1px);
+    }
+    button.active {
+      background: var(--primary);
+      color: var(--primary-text);
+      border-color: var(--primary);
+    }
+    button.active:focus,
+    button.active:focus-visible {
+      background: #f59e0b;
+      color: #111827;
+      border-color: #b45309;
+    }
+
+    .sort-active {
+      background: #16a34a !important;
+      color: #ffffff !important;
+      border-color: #15803d !important;
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, .18);
+    }
+    .sort-active::before {
+      content: "✓ ";
+      font-weight: 800;
+    }
+    button.small { padding: 6px 10px; font-size: 12px; }
+    button.danger { color: var(--danger); }
+    .manual-context-menu {
+      position: fixed;
+      z-index: 10000;
+      min-width: 180px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 16px 34px rgba(15, 23, 42, .22);
+      padding: 6px;
+      display: none;
+    }
+    .manual-context-menu.show { display: grid; gap: 4px; }
+    .manual-context-menu button {
+      width: 100%;
+      text-align: left;
+      border: 0;
+      border-radius: 10px;
+      background: #ffffff;
+      padding: 10px 12px;
+      justify-content: flex-start;
+    }
+    .manual-context-menu button:hover,
+    .manual-context-menu button:focus-visible {
+      background: #fee2e2;
+      color: var(--danger);
+      box-shadow: none;
+      transform: none;
+    }
+    .manual-context-hint { font-size: 11px; color: var(--muted); padding: 4px 8px 2px; }
+    .action-btn {
+      min-width: 56px;
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .action-btn-black {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
+    }
+    #categoriesTable tr:nth-child(odd) { background: #ffffff; }
+    #categoriesTable tr:nth-child(even) { background: #f3f4f6; }
+
+
+    /* Ajuste compacto en Detalle por localidad:
+       - Tipo reducido a la mitad del ancho anterior.
+       - Campos más pegados con menor padding y columnas más cerradas.
+       Los cálculos no se alteran; solo cambia el espacio visual de captura. */
+    .desktop-table table.manual-detail-table {
+      min-width: 560px;
+      table-layout: fixed;
+    }
+    .manual-detail-table th,
+    .manual-detail-table td {
+      padding: 5px 4px;
+    }
+    .manual-detail-table th:nth-child(1),
+    .manual-detail-table td:nth-child(1) { width: 38px; }
+    .manual-detail-table th:nth-child(2),
+    .manual-detail-table td:nth-child(2) { width: 74px; }
+    .manual-detail-table th:nth-child(3),
+    .manual-detail-table td:nth-child(3) { width: 105px; }
+    .manual-detail-table th:nth-child(4),
+    .manual-detail-table td:nth-child(4) { width: 62px; }
+    .manual-detail-table th:nth-child(5),
+    .manual-detail-table td:nth-child(5) { width: 108px; }
+    .manual-detail-table th:nth-child(6),
+    .manual-detail-table td:nth-child(6) { width: 82px; }
+    .manual-detail-table input {
+      padding: 5px 5px;
+      font-size: 12px;
+      border-radius: 7px;
+    }
+    .manual-detail-table .count-input {
+      width: 58px;
+      padding-left: 3px;
+      padding-right: 3px;
+    }
+    .manual-detail-table input[data-kind="name"],
+    .manual-detail-table input[data-kind="new-name"] {
+      width: 100%;
+      max-width: 100%;
+    }
+    .manual-detail-table input[data-kind="price"],
+    .manual-detail-table input[data-kind="new-price"] {
+      width: 100%;
+      max-width: 58px;
+      padding-left: 4px;
+      padding-right: 4px;
+      text-align: right;
+    }
+    .manual-detail-table button.small {
+      padding: 4px 6px;
+      font-size: 11px;
+      border-radius: 8px;
+    }
+    .layout {
+      display: grid;
+      /* Panel lateral reducido 1/6 adicional: 120px -> 100px */
+      grid-template-columns: 100px 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+    .left-panel {
+      align-self: start;
+      display: grid;
+      gap: 6px;
+      align-content: start;
+    }
+    .counter-panel {
+      min-width: 0;
+      align-self: start;
+    }
+    .config-card .inner {
+      padding: 5px;
+      gap: 4px;
+    }
+    .config-card .section-title {
+      font-size: 12px;
+      margin-bottom: 1px;
+    }
+    .config-card .field {
+      gap: 3px;
+    }
+    .config-card .field label {
+      font-size: 11px;
+    }
+    .config-card input {
+      padding: 5px;
+      font-size: 11px;
+      border-radius: 8px;
+    }
+    .config-card .softbox {
+      padding: 5px;
+      gap: 3px;
+      font-size: 10px;
+      border-radius: 10px;
+    }
+    .config-card button {
+      padding: 5px;
+      font-size: 10px;
+      border-radius: 8px;
+    }
+
+
+
+    details.collapsible-card {
+      overflow: hidden;
+    }
+    .collapsible-summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      padding: 6px 5px;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid var(--border);
+      font-weight: 800;
+      color: var(--text);
+      background: #ffffff;
+    }
+    .collapsible-summary::-webkit-details-marker {
+      display: none;
+    }
+    .collapsible-summary:focus,
+    .collapsible-summary:focus-visible {
+      outline: none;
+      background: #f59e0b;
+      color: #111827;
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, .22) inset;
+    }
+    .collapsible-title {
+      font-size: 11px;
+      line-height: 1.05;
+    }
+    .collapsible-chevron {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      font-size: 10px;
+      transition: transform .18s ease;
+      flex: 0 0 auto;
+    }
+    details.collapsible-card[open] .collapsible-chevron {
+      transform: rotate(180deg);
+    }
+    details.collapsible-card:not([open]) .collapsible-summary {
+      border-bottom: 0;
+    }
+    details.collapsible-card > .inner {
+      padding-top: 7px;
+    }
+
+    .side-actions-card .inner {
+      padding: 5px;
+      gap: 4px;
+    }
+    .side-actions {
+      display: grid;
+      gap: 4px;
+    }
+    .side-actions button {
+      width: 100%;
+      justify-content: center;
+      padding: 5px 4px;
+      font-size: 9px;
+      border-radius: 9px;
+      line-height: 1.15;
+      white-space: normal;
+    }
+    .side-actions .button-group-title {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-top: 4px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 0 10px;
+    }
+    .stack { display: grid; gap: 12px; }
+    .field { display: grid; gap: 6px; }
+    .field label { font-size: 13px; font-weight: 600; }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: white;
+      font-size: 14px;
+    }
+    .grid-2, .grid-3, .grid-4 {
+      display: grid;
+      gap: 10px;
+    }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .softbox {
+      background: var(--soft);
+      border-radius: 14px;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      font-size: 14px;
+    }
+    .row-between {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+    }
+    th { font-size: 12px; color: var(--muted); }
+    th[data-manual-sort] {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    th[data-manual-sort]:hover {
+      background: #e2e8f0;
+      color: var(--text);
+    }
+    th.manual-sort-active {
+      background: #dcfce7;
+      color: #166534;
+    }
+    th.manual-sort-active::after {
+      content: " " attr(data-sort-symbol);
+      font-weight: 800;
+    }
+    td.right, th.right { text-align: right; }
+    td.center, th.center { text-align: center; }
+    tr.selected { background: var(--selected); }
+    tr.clickable { cursor: pointer; }
+    .desktop-table {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .desktop-table table {
+      min-width: 920px;
+    }
+    .mobile-cards { display: none; }
+    .cat-mobile {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      background: white;
+      display: grid;
+      gap: 8px;
+    }
+    .totals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .note { font-size: 12px; color: var(--muted); }
+    .sheet-panel { background: #f8fafc; border: 1px dashed var(--border); border-radius: 12px; padding: 10px; display: grid; gap: 8px; }
+    .sheet-panel input { padding: 8px 10px; font-size: 12px; }
+    .sheet-panel input[readonly] { background: #f1f5f9; color: var(--muted); cursor: not-allowed; }
+    .sheet-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .sheet-status { font-size: 12px; color: var(--muted); min-height: 16px; }
+
+    .web-events-panel {
+      margin-top: 12px;
+    }
+    .web-events-filters {
+      display: grid;
+      grid-template-columns: 1fr 160px 160px auto;
+      gap: 10px;
+      align-items: end;
+    }
+    .web-events-filters input {
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+    .web-events-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: white;
+    }
+    .web-events-table {
+      min-width: 760px;
+      table-layout: fixed;
+    }
+    .web-events-table th,
+    .web-events-table td {
+      padding: 7px 8px;
+    }
+    .web-events-table .web-col-merge { width: 52px; }
+    .web-events-table .web-col-id { width: 255px; }
+    .web-events-table .web-col-date { width: 150px; }
+    .web-events-table .web-col-money { width: 135px; }
+    .web-events-table .web-col-load { width: 72px; }
+    .web-events-table .web-cell-clip {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .web-events-table tbody tr:nth-child(odd) { background: #ffffff; }
+    .web-events-table tbody tr:nth-child(even) { background: #f8fafc; }
+    .web-events-table button {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    .web-merge-toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      background: #f8fafc;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 10px;
+    }
+    .web-merge-counter {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .web-event-merge-check {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--primary);
+    }
+    .web-event-row.merge-selected {
+      background: #ecfeff !important;
+      outline: 2px solid #06b6d4;
+      outline-offset: -2px;
+    }
+    .web-events-table th[data-web-sort] {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .web-events-table th[data-web-sort]:hover {
+      background: #e2e8f0;
+      color: var(--text);
+    }
+    .web-events-table th.web-sort-active {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .web-events-table th.web-sort-active::after {
+      content: " " attr(data-sort-symbol);
+      font-weight: 800;
+    }
+    .web-events-empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 14px;
+    }
+
+    .web-loading-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 12000;
+      background: rgba(15, 23, 42, .50);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    .web-loading-backdrop.show { display: flex; }
+    .web-loading-box {
+      width: min(420px, 100%);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 24px 54px rgba(15, 23, 42, .30);
+      padding: 22px;
+      display: grid;
+      gap: 12px;
+      text-align: center;
+    }
+    .web-loading-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .web-loading-text {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .web-loading-spinner {
+      width: 44px;
+      height: 44px;
+      border: 5px solid #e2e8f0;
+      border-top-color: var(--primary);
+      border-radius: 999px;
+      margin: 0 auto;
+      animation: webSpin .85s linear infinite;
+    }
+    @keyframes webSpin { to { transform: rotate(360deg); } }
+
+
+    .web-message-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 13000;
+      background: rgba(15, 23, 42, .42);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    .web-message-backdrop.show { display: flex; }
+    .web-message-box {
+      width: min(440px, 100%);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 24px 54px rgba(15, 23, 42, .32);
+      padding: 20px;
+      display: grid;
+      gap: 12px;
+      text-align: center;
+    }
+    .web-message-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .web-message-text {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.4;
+      white-space: pre-line;
+    }
+    .web-message-box.error .web-message-title,
+    .web-message-box.error .web-message-text { color: var(--danger); }
+    .web-message-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .web-message-actions button { min-width: 110px; }
+
+    .count-input {
+      width: 86px;
+      text-align: center;
+      font-weight: 700;
+    }
+    .new-category-row {
+      background: #eef2ff !important;
+    }
+    .new-category-row input {
+      border-color: #c7d2fe;
+    }
+
+    .numeric-dialog-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .42);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #e8e0c8, #d8ccb0);
-      color: #2f4a2f;
+      z-index: 9999;
+      padding: 16px;
     }
-
-    .contenedor {
-      width: 90%;
-      max-width: 600px;
-      background: #f7f1df;
+    .numeric-dialog {
+      width: min(420px, 100%);
+      background: white;
       border-radius: 18px;
-      padding: 36px 28px;
-      text-align: center;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
-      border: 1px solid #b8c7a3;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 40px rgba(15, 23, 42, .22);
+      padding: 18px;
+      display: grid;
+      gap: 12px;
     }
-
-    .logo {
-      width: 180px;
-      max-width: 70%;
-      height: auto;
-      margin-bottom: 20px;
+    .numeric-dialog-title { font-size: 16px; font-weight: 700; }
+    .numeric-dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    @media (max-width: 980px) {
+      .grid-summary, .layout, .totals-grid { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+      .left-panel {
+        grid-template-columns: repeat(3, minmax(130px, 1fr));
+        overflow-x: auto;
+        padding-bottom: 4px;
+        align-items: start;
+      }
+      .left-panel > .card { min-width: 130px; }
     }
-
-    h1 {
-      margin: 0 0 14px;
-      font-size: 2rem;
-      color: #3d5a2a;
-    }
-
-    p {
-      margin: 10px 0;
-      font-size: 1.08rem;
-      line-height: 1.6;
-      color: #556b3f;
-    }
-
-    .aviso {
-      margin-top: 22px;
-      display: inline-block;
-      padding: 12px 18px;
-      border-radius: 10px;
-      background: #e3ecd2;
-      border: 1px solid #a9bb8c;
-      color: #486334;
-      font-weight: bold;
+    @media (max-width: 760px) {
+      .desktop-table {
+        display: block;
+        overflow-x: auto;
+      }
+      .desktop-table table {
+        min-width: 920px;
+      }
+      .mobile-cards { display: none !important; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      h1 { font-size: 24px; }
+      .toolbar { align-items: stretch; }
+      th, td { padding: 8px 10px; }
+      .left-panel { gap: 8px; }
+      .config-card .inner, .side-actions-card .inner { padding: 8px; }
+      .side-actions { gap: 6px; }
+      .side-actions button { padding: 6px 5px; font-size: 10px; }
+      .web-events-filters { grid-template-columns: 1fr; }
+      .web-events-table { min-width: 760px; }
     }
   </style>
 </head>
 <body>
-  <div class="contenedor">
-    <img src="logo CAM.png" alt="Logo del Club Alpino Mexicano" class="logo" />
-    <h1>Bienvenido al Examen</h1>
-    <p><strong>Club Alpino Mexicano, Delegación Baja California</strong></p>
-    
-    <p>Será redirigido automáticamente al formulario en unos segundos.</p>
-    <div class="aviso">Redirigiendo...</div>
+  <div class="wrap">
+    <h1>Control de ingreso a evento</h1>
+    <p class="lead">Lleva conteo manual de asistentes, clasifica tipos de acceso y calcula cargos fiscales y administrativos del evento.</p>
+
+    <div class="sticky-top-panel">
+      <div class="grid-summary">
+        <div class="card summary-half"><div class="inner"><div class="muted">Total personas</div><div class="big" id="sumTotalPersons">0</div></div></div>
+        <div class="card summary-half"><div class="inner"><div class="muted">Pagados</div><div class="big" id="sumPaying">0</div></div></div>
+        <div class="card"><div class="inner"><div class="muted">Ingreso bruto</div><div class="big" id="sumGross">$0.00</div></div></div>
+        <div class="card"><div class="inner"><div class="muted">Cargos totales</div><div class="big" id="sumCharges">$0.00</div></div></div>
+      </div>
+
+      <div class="tabs">
+        <button id="tabEventosWeb" class="active">Eventos guardados Web</button>
+        <button id="tabContador">Detalle por localidad</button>
+        <button id="tabImpuestos">Impuestos</button>
+      </div>
+    </div>
+
+    <div id="viewContador">
+      <div class="layout">
+        <div class="left-panel">
+          <details class="card collapsible-card config-card" data-collapse-id="evento" open>
+            <summary class="collapsible-summary">
+              <span class="collapsible-title">Evento</span>
+              <span class="collapsible-chevron" aria-hidden="true">▾</span>
+            </summary>
+            <div class="inner stack">
+              <div class="field">
+                <label>Nombre del evento</label>
+                <input id="eventName" type="text" placeholder="Nombre del evento" />
+              </div>
+              <div class="softbox">
+                <div class="row-between"><span>Cortesías / localidades</span><strong id="courtesyPersonsBox">0</strong></div>
+                <div class="row-between"><span>Ingreso bruto</span><strong id="grossBox">$0.00</strong></div>
+              </div>
+              <button id="resetCountsBtn">Reiniciar contadores</button>
+            </div>
+          </details>
+
+          <details class="card collapsible-card side-actions-card" data-collapse-id="web" open>
+            <summary class="collapsible-summary">
+              <span class="collapsible-title">Web</span>
+              <span class="collapsible-chevron" aria-hidden="true">▾</span>
+            </summary>
+            <div class="inner stack">
+              <div class="side-actions">
+                <button id="saveSheetBtn" type="button" class="active">Guardar Web</button>
+                <button id="loadSheetBtn" type="button">Cargar Web</button>
+              </div>
+              <input id="sheetWebAppUrl" type="hidden" value="https://script.google.com/macros/s/AKfycbwn_NRpcDVdBhdxTgxn8njGAAKoFwMaN2x7nUV3JiArSy8zbGAr69HD90uwHlWqwW57/exec" />
+              <div id="sheetStatus" class="sheet-status" style="display:none;"></div>
+            </div>
+          </details>
+
+          <details class="card collapsible-card side-actions-card" data-collapse-id="archivos" open>
+            <summary class="collapsible-summary">
+              <span class="collapsible-title">Archivos</span>
+              <span class="collapsible-chevron" aria-hidden="true">▾</span>
+            </summary>
+            <div class="inner stack">
+              <div class="side-actions">
+                <button id="importTableBtn" type="button" title="Orden: name, count, price.">Importar tabla TXT</button>
+                <button id="mergeEventsBtn" type="button" title="Selecciona 2 o más eventos TXT para homologar localidades y sumar boletos.">Juntar eventos TXT</button>
+                <button id="generatePdfBtn" type="button">Generar reporte PDF</button>
+                <button id="saveTxtBtn" type="button">Guardar TXT</button>
+                <button id="loadTxtBtn" type="button">Cargar TXT</button>
+              </div>
+              <input id="importTableInput" type="file" accept=".txt,text/plain" style="display:none;" />
+              <input id="mergeEventsInput" type="file" accept=".txt,.json,application/json,text/plain" multiple style="display:none;" />
+              <input id="loadTxtInput" type="file" accept=".txt,application/json,text/plain" style="display:none;" />
+            </div>
+          </details>
+        </div>
+
+        <div class="stack counter-panel">
+          <div class="card"><div class="inner stack">
+            <div class="toolbar">
+              <div class="toolbar-left">
+                <div class="section-title" style="margin:0;">Detalle por localidad</div>
+              </div>
+              <div class="toolbar-right"></div>
+            </div>
+            <div class="desktop-table"><table class="manual-detail-table">
+              <thead>
+                <tr>
+                  <th class="center" data-manual-sort="index">#</th>
+                  <th class="center" data-manual-sort="count">Entradas</th>
+                  <th data-manual-sort="name">Tipo</th>
+                  <th data-manual-sort="price">Precio</th>
+                  <th class="right" data-manual-sort="subtotal">Subtotal</th>
+                  <th data-manual-sort="courtesy">Cortesía</th>
+                </tr>
+              </thead>
+              <tbody id="categoriesTable"></tbody>
+            </table></div>
+            <div class="mobile-cards" id="categoriesMobile"></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="viewEventosWeb" style="display:none;">
+      <div class="stack">
+          <div class="card web-events-panel"><div class="inner stack">
+            <div class="section-title">Eventos guardados en Web</div>
+            <div class="web-events-filters">
+              <div class="field">
+                <label>Filtrar por ID / evento</label>
+                <input id="webEventFilterId" type="text" placeholder="Ej. Concierto mayo" autocomplete="off" />
+              </div>
+              <div class="field">
+                <label>Fecha desde</label>
+                <input id="webEventDateFrom" type="date" />
+              </div>
+              <div class="field">
+                <label>Fecha hasta</label>
+                <input id="webEventDateTo" type="date" />
+              </div>
+              <button id="refreshWebEventsBtn" type="button" class="active">Buscar eventos</button>
+            </div>
+            <div class="note">Puedes elegir un evento guardado para cargar sus datos o marcar 2 o más eventos para unirlos en una sola tabla homologada.</div>
+            <div class="web-merge-toolbar">
+              <button id="mergeWebEventsBtn" type="button" class="active">Unir eventos seleccionados</button>
+              <span id="webMergeSelectedCount" class="web-merge-counter">Seleccionados: 0 · mínimo 2</span>
+            </div>
+            <div class="web-events-table-wrap">
+              <table class="web-events-table">
+                <thead>
+                  <tr>
+                    <th class="center web-col-merge">Unir</th>
+                    <th class="web-col-id" data-web-sort="recordId">ID / Evento</th>
+                    <th class="web-col-date" data-web-sort="updatedAt">Fecha de captura</th>
+                    <th class="right web-col-money" data-web-sort="grossIncome">Ingreso bruto</th>
+                    <th class="right web-col-money" data-web-sort="totalCharges">Cargos</th>
+                    <th class="center web-col-load">Cargar</th>
+                  </tr>
+                </thead>
+                <tbody id="webEventsTable">
+                  <tr><td colspan="6" class="web-events-empty">Presiona “Buscar eventos” para ver los registros guardados.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div></div>
+      </div>
+    </div>
+
+    <div id="viewImpuestos" style="display:none;">
+      <div class="layout">
+        <div class="stack">
+          <div class="card"><div class="inner stack">
+            <div class="section-title">Factores de cálculo</div>
+
+            <details class="card collapsible-card" data-collapse-id="factorEstado" open>
+              <summary class="collapsible-summary">
+                <span class="collapsible-title">Estado</span>
+                <span class="collapsible-chevron" aria-hidden="true">▾</span>
+              </summary>
+              <div class="inner stack" style="padding:12px;">
+                <div class="field"><label>Impuesto Estatal (%)</label><input id="stateTaxRate" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" step="0.01" min="0" value="4" /></div>
+                <div class="field"><label>Factor multiplicador del ingreso</label><input id="stateIncomeFactor" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" step="0.0001" min="0" value="1" /></div>
+                <div class="grid-2">
+                  <div class="field"><label>Interventores estado</label><input id="stateInterventorCount" type="number" inputmode="numeric" pattern="[0-9]*" min="0" step="1" value="0" /></div>
+                  <div class="field"><label>Honorario estado</label><input id="stateInterventorFeePerPerson" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" step="0.01" min="0" value="0" /></div>
+                </div>
+                <div class="field"><label>Multa(+)/Fianza (-) Estado</label><input id="stateFineAmount" type="text" inputmode="decimal" pattern="-?[0-9]*[.,]?[0-9]*" step="0.01" value="0" /></div>
+                <div class="softbox">
+                  <div class="row-between"><span>Promedio localidades pagadas</span><strong id="avgPaidLocality"></strong></div>
+                  <div class="row-between"><span>Valor cortesías para estado</span><strong id="courtesyValueState"></strong></div>
+                  <div class="row-between"><span>Base antes del factor</span><strong id="stateBaseBefore"></strong></div>
+                  <div class="row-between"><span>Base impuesto estado</span><strong id="stateTaxBase"></strong></div>
+                </div>
+              </div>
+            </details>
+
+            <details class="card collapsible-card" data-collapse-id="factorMunicipio" open>
+              <summary class="collapsible-summary">
+                <span class="collapsible-title">Municipio</span>
+                <span class="collapsible-chevron" aria-hidden="true">▾</span>
+              </summary>
+              <div class="inner stack" style="padding:12px;">
+                <div class="field"><label>Impuesto Municipio (%)</label><input id="municipalTaxRate" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" step="0.01" min="0" value="2" /></div>
+                <div class="field"><label>Factor multiplicador del ingreso</label><input id="municipalIncomeFactor" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" step="0.0001" min="0" value="1" /></div>
+                <div class="grid-2">
+                  <div class="field"><label>Interventores municipio</label><input id="municipalInterventorCount" type="number" inputmode="numeric" pattern="[0-9]*" min="0" step="1" value="1" /></div>
+                  <div class="field"><label>Honorario municipio</label><input id="municipalInterventorFeePerPerson" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" step="0.01" min="0" value="0" /></div>
+                </div>
+                <div class="field"><label>Multa(+)/Fianza (-) Municipio</label><input id="municipalFineAmount" type="text" inputmode="decimal" pattern="-?[0-9]*[.,]?[0-9]*" step="0.01" value="0" /></div>
+                <div class="softbox">
+                  <div class="row-between"><span>Base antes del factor</span><strong id="municipalBaseBefore"></strong></div>
+                  <div class="row-between"><span>Base impuesto municipio</span><strong id="municipalTaxBase"></strong></div>
+                </div>
+              </div>
+            </details>
+          </div></div>
+        </div>
+
+        <div class="stack">
+          <div class="card"><div class="inner stack">
+            <div class="section-title">Concentrados</div>
+            <div class="grid-2">
+              <div class="card"><div class="inner"><div class="muted">Ingreso bruto cobrado</div><div class="big" style="font-size:22px;" id="grossIncomeCard"></div></div></div>
+              <div class="card"><div class="inner"><div class="muted">Valor cortesías para estado</div><div class="big" style="font-size:22px;" id="courtesyStateCard"></div></div></div>
+            </div>
+
+            <div class="subtabs">
+              <button id="subLocalidades" class="active">Concentrados por localidad</button>
+              <button id="subTotales">Concentrados de totales</button>
+            </div>
+
+            <div id="subViewLocalidades" class="stack">
+              <details class="card collapsible-card" data-collapse-id="concentradoAsistentes" open>
+                <summary class="collapsible-summary">
+                  <span class="collapsible-title">Concentrado de asistentes por localidad</span>
+                  <span class="collapsible-chevron" aria-hidden="true">▾</span>
+                </summary>
+                <div class="inner stack">
+                  <div class="overflow"><table>
+                    <thead>
+                      <tr>
+                        <th class="center">#</th>
+                        <th class="center">Cantidad de asistentes</th>
+                        <th>Localidad</th>
+                        <th class="right">Precio unitario</th>
+                        <th class="right">Multiplicación</th>
+                      </tr>
+                    </thead>
+                    <tbody id="boletosTable"></tbody>
+                  </table></div>
+                </div>
+              </details>
+
+              <details class="card collapsible-card" data-collapse-id="concentradoPrecioLetra" open>
+                <summary class="collapsible-summary">
+                  <span class="collapsible-title">Concentrado con precio en letra</span>
+                  <span class="collapsible-chevron" aria-hidden="true">▾</span>
+                </summary>
+                <div class="inner stack">
+                  <div class="overflow"><table>
+                    <thead>
+                      <tr>
+                        <th class="center">#</th>
+                        <th>Cantidad de asistentes</th>
+                        <th>Localidad</th>
+                        <th>Precio unitario</th>
+                        <th>Precio unitario en letra</th>
+                        <th class="right">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody id="incomeTable"></tbody>
+                  </table></div>
+                </div>
+              </details>
+            </div>
+
+            <div id="subViewTotales" class="stack" style="display:none;">
+              <div class="grid-2">
+                <details class="card collapsible-card" data-collapse-id="concentradoEstatal" open>
+                  <summary class="collapsible-summary">
+                    <span class="collapsible-title">Concentrado estatal</span>
+                    <span class="collapsible-chevron" aria-hidden="true">▾</span>
+                  </summary>
+                  <div class="inner stack">
+                    <div class="softbox" id="stateConcentrado"></div>
+                  </div>
+                </details>
+                <details class="card collapsible-card" data-collapse-id="concentradoMunicipal" open>
+                  <summary class="collapsible-summary">
+                    <span class="collapsible-title">Concentrado municipal</span>
+                    <span class="collapsible-chevron" aria-hidden="true">▾</span>
+                  </summary>
+                  <div class="inner stack">
+                    <div class="softbox" id="municipalConcentrado"></div>
+                  </div>
+                </details>
+              </div>
+
+              <div class="card"><div class="inner stack">
+                <div class="section-title">Resumen por nivel de gobierno</div>
+                <div class="totals-grid">
+                  <div class="card"><div class="inner stack" id="estadoResumen"></div></div>
+                  <div class="card"><div class="inner stack" id="municipioResumen"></div></div>
+                  <div class="card"><div class="inner stack" style="background:var(--soft); border-radius:14px;" id="generalResumen"></div></div>
+                </div>
+              </div></div>
+            </div>
+          </div></div>
+        </div>
+      </div>
+    </div>
   </div>
+
+
+  <div id="webEventsLoading" class="web-loading-backdrop" aria-live="assertive" aria-modal="true" role="dialog">
+    <div class="web-loading-box">
+      <div class="web-loading-spinner" aria-hidden="true"></div>
+      <div class="web-loading-title" id="webEventsLoadingTitle">Procesando datos Web</div>
+      <div class="web-loading-text" id="webEventsLoadingText">Espera a que termine el proceso. El mensaje se quitará automáticamente al finalizar.</div>
+    </div>
+  </div>
+
+  <div id="webMessageModal" class="web-message-backdrop" aria-live="assertive" aria-modal="true" role="dialog" aria-hidden="true">
+    <div id="webMessageBox" class="web-message-box">
+      <div class="web-message-title" id="webMessageTitle">Aviso</div>
+      <div class="web-message-text" id="webMessageText"></div>
+      <div class="web-message-actions" id="webMessageActions">
+        <button type="button" class="active" id="webMessageOkBtn">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    const FIXED_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwn_NRpcDVdBhdxTgxn8njGAAKoFwMaN2x7nUV3JiArSy8zbGAr69HD90uwHlWqwW57/exec";
+
+    const state = {
+      activeTab: 'eventosWeb',
+      eventName: '',
+      impuestosTab: 'localidades',
+      categorySortDesc: false,
+      categorySortTypeAsc: false,
+      manualSortKey: 'index',
+      manualSortDir: 'asc',
+      stateTaxRate: 4,
+      municipalTaxRate: 2,
+      stateTaxMode: 'total',
+      municipalTaxMode: 'cobrado',
+      stateIncomeFactor: 1,
+      municipalIncomeFactor: 1,
+      stateInterventorCount: 0,
+      stateInterventorFeePerPerson: 0,
+      stateFineAmount: 0,
+      municipalInterventorCount: 1,
+      municipalInterventorFeePerPerson: 0,
+      municipalFineAmount: 0,
+      sheetWebAppUrl: FIXED_SHEET_WEB_APP_URL,
+      sheetRecordId: localStorage.getItem('sheetRecordId') || '',
+      selectedRowId: null,
+      webEventsRecords: [],
+      webMergeSelectedRecordIds: [],
+      webEventsSortKey: 'updatedAt',
+      webEventsSortDir: 'desc',
+      newCategoryDraft: { count: '', name: '', price: '', courtesy: false },
+      categories: [
+        { id: 1, name: 'General', price: 250, count: 0, courtesy: false },
+        { id: 2, name: 'VIP', price: 450, count: 0, courtesy: false },
+        { id: 3, name: 'Cortesía Prensa', price: 0, count: 0, courtesy: true },
+        { id: 4, name: 'Cortesía Staff', price: 0, count: 0, courtesy: true },
+      ]
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const n = (v) => Number(String(v || 0).replace(',', '.'));
+
+    let lastWebSaveFingerprint = '';
+    let isWebSaveInProgress = false;
+    let exitAutoSaveAlreadySent = false;
+
+    function getWebSaveComparableData() {
+      const data = getSerializableState();
+      delete data.activeTab;
+      delete data.impuestosTab;
+      delete data.categorySortDesc;
+      delete data.categorySortTypeAsc;
+      delete data.manualSortKey;
+      delete data.manualSortDir;
+      delete data.sheetRecordId;
+      return data;
+    }
+
+    function getWebSaveFingerprint() {
+      try {
+        if (document.activeElement && document.activeElement.dataset && document.activeElement.dataset.kind) {
+          applyManualTableFieldValue(document.activeElement);
+        }
+      } catch (error) {
+        console.warn('No se pudo sincronizar el campo activo antes de comparar cambios.', error);
+      }
+      return JSON.stringify(getWebSaveComparableData());
+    }
+
+    function markWebSaveBaseline() {
+      lastWebSaveFingerprint = getWebSaveFingerprint();
+      exitAutoSaveAlreadySent = false;
+    }
+
+    function markDataChanged() {
+      // Marca que sí hubo cambio local para que la pantalla y el autoguardado no se queden con datos viejos.
+      exitAutoSaveAlreadySent = false;
+    }
+
+    function hasUnsavedWebChanges() {
+      return getWebSaveFingerprint() !== lastWebSaveFingerprint;
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(Number(value || 0));
+    }
+
+    function formatWholeNumber(value) {
+      return new Intl.NumberFormat('es-MX', { maximumFractionDigits: 0 }).format(Math.round(Number(value || 0)));
+    }
+
+    function round2(value) {
+      return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+    }
+
+    function numberToWordsEs(num) {
+      const nnum = Math.floor(Number(num || 0));
+      if (nnum === 0) return 'cero';
+      const units = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
+      const teens = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
+      const tens = ['', '', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+      const hundreds = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+      function under1000(x) {
+        if (x === 0) return '';
+        if (x === 100) return 'cien';
+        if (x < 10) return units[x];
+        if (x < 20) return teens[x - 10];
+        if (x < 30) {
+          if (x === 20) return 'veinte';
+          const specials = {
+            22: 'veintidós',
+            23: 'veintitrés',
+            26: 'veintiséis'
+          };
+          return specials[x] || `veinti${units[x - 20]}`;
+        }
+        if (x < 100) {
+          const t = Math.floor(x / 10);
+          const u = x % 10;
+          return u === 0 ? tens[t] : `${tens[t]} y ${units[u]}`;
+        }
+        const h = Math.floor(x / 100);
+        const rest = x % 100;
+        return rest === 0 ? hundreds[h] : `${hundreds[h]} ${under1000(rest)}`;
+      }
+      if (nnum < 1000) return under1000(nnum);
+      if (nnum < 1000000) {
+        const thousands = Math.floor(nnum / 1000);
+        const rest = nnum % 1000;
+        const thousandText = thousands === 1 ? 'mil' : `${under1000(thousands)} mil`;
+        return rest === 0 ? thousandText : `${thousandText} ${under1000(rest)}`;
+      }
+      const millions = Math.floor(nnum / 1000000);
+      const rest = nnum % 1000000;
+      const millionText = millions === 1 ? 'un millón' : `${numberToWordsEs(millions)} millones`;
+      if (rest === 0) return millionText;
+      if (rest < 1000) return `${millionText} ${under1000(rest)}`;
+      const thousands = Math.floor(rest / 1000);
+      const last = rest % 1000;
+      const thousandText = thousands === 1 ? 'mil' : `${under1000(thousands)} mil`;
+      return last === 0 ? `${millionText} ${thousandText}` : `${millionText} ${thousandText} ${under1000(last)}`;
+    }
+
+    function moneyToWordsEs(value) {
+      const amount = Number(value || 0);
+      const whole = Math.floor(amount);
+      const cents = Math.round((amount - whole) * 100);
+      return `${numberToWordsEs(whole)} pesos ${String(cents).padStart(2, '0')}/100 M.N.`;
+    }
+
+    function getCategoryOriginalIndex(item) {
+      return state.categories.findIndex(row => row.id === item.id);
+    }
+
+    function getCategorySortValue(item, key) {
+      switch (key) {
+        case 'count': return n(item.count);
+        case 'name': return normalizeLocalityKey(item.name || '');
+        case 'price': return n(item.price);
+        case 'subtotal': return round2(n(item.price) * n(item.count));
+        case 'courtesy': return item.courtesy ? 1 : 0;
+        case 'index':
+        default: return getCategoryOriginalIndex(item);
+      }
+    }
+
+    function getManualSortDefaultDir(key) {
+      if (key === 'name' || key === 'index') return 'asc';
+      return 'desc';
+    }
+
+    function setManualCategorySort(key) {
+      key = String(key || 'index');
+      if (state.manualSortKey === key) {
+        state.manualSortDir = state.manualSortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.manualSortKey = key;
+        state.manualSortDir = getManualSortDefaultDir(key);
+      }
+      state.categorySortTypeAsc = state.manualSortKey === 'name' && state.manualSortDir === 'asc';
+      state.categorySortDesc = state.manualSortKey === 'price' && state.manualSortDir === 'desc';
+      render();
+    }
+
+    function updateManualSortIndicators() {
+      const key = state.manualSortKey || 'index';
+      const dir = state.manualSortDir === 'desc' ? 'desc' : 'asc';
+      document.querySelectorAll('[data-manual-sort]').forEach(th => {
+        const active = th.dataset.manualSort === key;
+        th.classList.toggle('manual-sort-active', active);
+        th.setAttribute('aria-sort', active ? (dir === 'asc' ? 'ascending' : 'descending') : 'none');
+        th.setAttribute('data-sort-symbol', dir === 'asc' ? '▲' : '▼');
+      });
+    }
+
+    function getSortedCategories() {
+      const list = [...state.categories];
+      const key = state.manualSortKey || (state.categorySortTypeAsc ? 'name' : (state.categorySortDesc ? 'price' : 'index'));
+      const dir = state.manualSortDir || (state.categorySortDesc ? 'desc' : 'asc');
+      const direction = dir === 'desc' ? -1 : 1;
+
+      list.sort((a, b) => {
+        const av = getCategorySortValue(a, key);
+        const bv = getCategorySortValue(b, key);
+        let result = 0;
+        if (typeof av === 'string' || typeof bv === 'string') {
+          result = String(av || '').localeCompare(String(bv || ''), 'es', { sensitivity: 'base', numeric: true });
+        } else {
+          result = Number(av || 0) - Number(bv || 0);
+        }
+        if (result === 0 && key !== 'index') {
+          result = getCategoryOriginalIndex(a) - getCategoryOriginalIndex(b);
+        }
+        return result * direction;
+      });
+      return list;
+    }
+
+    function compute() {
+      const sortedCategories = getSortedCategories();
+      const incomeCategories = [...state.categories]
+        .filter(item => n(item.price) > 0 && n(item.count) > 0)
+        .sort((a,b)=>n(b.price)-n(a.price));
+
+      const boletosDetallados = incomeCategories.map(item => ({
+        key: String(item.id),
+        itemId: item.id,
+        cantidadAsistentes: n(item.count),
+        localidad: item.name,
+        precioUnitario: n(item.price),
+        multiplicacion: round2(n(item.count) * n(item.price))
+      }));
+
+      const totalPersons = state.categories.reduce((acc, item) => acc + n(item.count), 0);
+      const payingCategories = state.categories.filter(item => !item.courtesy && n(item.price) > 0);
+      const payingPersons = payingCategories.reduce((acc, item) => acc + n(item.count), 0);
+      const courtesyPersons = state.categories.filter(item => item.courtesy || n(item.price) === 0).reduce((acc, item) => acc + n(item.count), 0);
+      const grossIncome = round2(state.categories.reduce((acc, item) => acc + n(item.price) * n(item.count), 0));
+
+      const averagePaidLocalityPrice = payingCategories.length
+        ? round2(payingCategories.reduce((acc, item) => acc + n(item.price), 0) / payingCategories.length)
+        : 0;
+
+      const courtesyEstimatedValueForState = round2(courtesyPersons * averagePaidLocalityPrice);
+      const stateBaseBeforeFactor = round2(state.stateTaxMode === 'total' ? grossIncome + courtesyEstimatedValueForState : grossIncome);
+      const municipalBaseBeforeFactor = grossIncome;
+      const stateTaxBase = round2(stateBaseBeforeFactor * n(state.stateIncomeFactor));
+      const municipalTaxBase = round2(municipalBaseBeforeFactor * n(state.municipalIncomeFactor));
+      const stateTaxAmount = round2(stateTaxBase * (n(state.stateTaxRate)/100));
+      const municipalTaxAmount = round2(municipalTaxBase * (n(state.municipalTaxRate)/100));
+      const totalStateInterventorFee = round2(n(state.stateInterventorCount) * n(state.stateInterventorFeePerPerson));
+      const totalMunicipalInterventorFee = round2(n(state.municipalInterventorCount) * n(state.municipalInterventorFeePerPerson));
+      const totalStateAdministrative = round2(totalStateInterventorFee + n(state.stateFineAmount));
+      const totalMunicipalAdministrative = round2(totalMunicipalInterventorFee + n(state.municipalFineAmount));
+      const totalTaxes = round2(stateTaxAmount + municipalTaxAmount);
+      const totalAdditionalCharges = round2(totalStateAdministrative + totalMunicipalAdministrative);
+      const totalCharges = round2(totalTaxes + totalAdditionalCharges);
+      const municipalGovernmentTotal = round2(municipalTaxAmount + totalMunicipalInterventorFee + n(state.municipalFineAmount));
+      const stateGovernmentTotal = round2(stateTaxAmount + totalStateInterventorFee + n(state.stateFineAmount));
+
+      return {
+        sortedCategories, incomeCategories, boletosDetallados,
+        totalPersons, payingPersons, courtesyPersons, grossIncome,
+        averagePaidLocalityPrice, courtesyEstimatedValueForState,
+        stateBaseBeforeFactor, municipalBaseBeforeFactor,
+        stateTaxBase, municipalTaxBase,
+        stateTaxAmount, municipalTaxAmount,
+        totalStateInterventorFee, totalMunicipalInterventorFee,
+        totalStateAdministrative, totalMunicipalAdministrative,
+        totalCharges, municipalGovernmentTotal, stateGovernmentTotal
+      };
+    }
+
+    function getSerializableState() {
+      return {
+        activeTab: state.activeTab,
+        eventName: state.eventName,
+        impuestosTab: state.impuestosTab,
+        categorySortDesc: state.categorySortDesc,
+        categorySortTypeAsc: state.categorySortTypeAsc,
+        manualSortKey: state.manualSortKey,
+        manualSortDir: state.manualSortDir,
+        stateTaxRate: state.stateTaxRate,
+        municipalTaxRate: state.municipalTaxRate,
+        stateTaxMode: state.stateTaxMode,
+        municipalTaxMode: state.municipalTaxMode,
+        stateIncomeFactor: state.stateIncomeFactor,
+        municipalIncomeFactor: state.municipalIncomeFactor,
+        stateInterventorCount: state.stateInterventorCount,
+        stateInterventorFeePerPerson: state.stateInterventorFeePerPerson,
+        stateFineAmount: state.stateFineAmount,
+        municipalInterventorCount: state.municipalInterventorCount,
+        municipalInterventorFeePerPerson: state.municipalInterventorFeePerPerson,
+        municipalFineAmount: state.municipalFineAmount,
+        sheetRecordId: state.sheetRecordId,
+        categories: state.categories
+      };
+    }
+
+    function loadSerializableState(data) {
+      const base = getSerializableState();
+      const merged = { ...base, ...data };
+      Object.assign(state, merged);
+      state.manualSortKey = state.manualSortKey || 'index';
+      state.manualSortDir = state.manualSortDir === 'desc' ? 'desc' : 'asc';
+      state.sheetWebAppUrl = FIXED_SHEET_WEB_APP_URL;
+      state.sheetRecordId = state.sheetRecordId || localStorage.getItem('sheetRecordId') || '';
+      state.categories = Array.isArray(merged.categories) ? merged.categories.map(item => ({
+        id: n(item.id) || Date.now() + Math.random(),
+        name: String(item.name || ''),
+        price: n(item.price),
+        count: Math.max(0, n(item.count)),
+        courtesy: Boolean(item.courtesy)
+      })) : base.categories;
+      state.selectedRowId = null;
+      syncInputsFromState();
+      render();
+    }
+
+    function syncInputsFromState() {
+      $('eventName').value = state.eventName;
+      $('stateTaxRate').value = state.stateTaxRate;
+      $('municipalTaxRate').value = state.municipalTaxRate;
+      $('stateIncomeFactor').value = state.stateIncomeFactor;
+      $('municipalIncomeFactor').value = state.municipalIncomeFactor;
+      $('stateInterventorCount').value = state.stateInterventorCount;
+      $('stateInterventorFeePerPerson').value = state.stateInterventorFeePerPerson;
+      $('stateFineAmount').value = state.stateFineAmount;
+      $('municipalInterventorCount').value = state.municipalInterventorCount;
+      $('municipalInterventorFeePerPerson').value = state.municipalInterventorFeePerPerson;
+      $('municipalFineAmount').value = state.municipalFineAmount;
+      if ($('sheetWebAppUrl')) $('sheetWebAppUrl').value = state.sheetWebAppUrl || '';
+      if ($('sheetRecordId')) $('sheetRecordId').value = state.sheetRecordId || '';
+    }
+
+    function saveTxtFile() {
+      const payload = JSON.stringify(getSerializableState(), null, 2);
+      const blob = new Blob([payload], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safeEventName = (state.eventName || 'contador_ingreso_evento')
+        .trim()
+        .replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_\- ]/g, '')
+        .replace(/\s+/g, '_');
+      a.download = `${safeEventName}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function handleLoadTxt(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result || '{}'));
+          loadSerializableState(parsed);
+        } catch (error) {
+          alert('No se pudo cargar el archivo TXT. Verifica que tenga un formato válido.');
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    function parseTableTxt(text) {
+      const lines = String(text || '')
+        .replace(/\r/g, '')
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean);
+
+      if (lines.length < 2) {
+        throw new Error('El archivo no contiene suficientes filas.');
+      }
+
+      const headers = lines[0].split('\t').map(h => h.trim().toLowerCase());
+      const nameIndex = headers.indexOf('name');
+      const countIndex = headers.indexOf('count');
+      const priceIndex = headers.indexOf('price');
+
+      if (nameIndex === -1 || countIndex === -1 || priceIndex === -1) {
+        throw new Error('El archivo debe incluir las columnas name, count y price.');
+      }
+
+      const imported = [];
+      for (const line of lines.slice(1)) {
+        const cols = line.split('\t');
+        const rawName = (cols[nameIndex] ?? '').trim();
+        const rawCount = n((cols[countIndex] ?? '').trim());
+        const rawPrice = n((cols[priceIndex] ?? '').trim());
+        if (!rawName) continue;
+        imported.push({
+          id: Date.now() + Math.random(),
+          name: rawName,
+          count: Number.isFinite(rawCount) ? Math.max(0, rawCount) : 0,
+          price: Number.isFinite(rawPrice) ? Math.max(0, rawPrice) : 0,
+          courtesy: false
+        });
+      }
+
+      if (!imported.length) {
+        throw new Error('No se encontraron filas válidas para importar.');
+      }
+
+      return imported;
+    }
+
+    function handleImportTableTxt(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const importedCategories = parseTableTxt(String(reader.result || ''));
+          const replaceAll = confirm(`¿Deseas reemplazar las categorías actuales con la tabla importada?
+Selecciona Cancelar para agregarlas a las existentes.`);
+          state.categories = replaceAll ? importedCategories : [...state.categories, ...importedCategories];
+          state.selectedRowId = null;
+          render();
+        } catch (error) {
+          alert(error.message || 'No se pudo importar la tabla TXT.');
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+
+    function readTextFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error(`No se pudo leer el archivo ${file && file.name ? file.name : ''}.`));
+        reader.readAsText(file, 'utf-8');
+      });
+    }
+
+    function normalizeLocalityKey(name) {
+      return String(name || '')
+        .trim()
+        .replace(/\s+/g, ' ')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase();
+    }
+
+    function sanitizeImportedCategory(item) {
+      const cleanName = String(item && item.name ? item.name : '').trim().replace(/\s+/g, ' ');
+      const cleanCount = Number.isFinite(n(item && item.count)) ? Math.max(0, n(item.count)) : 0;
+      const cleanPrice = Number.isFinite(n(item && item.price)) ? Math.max(0, n(item.price)) : 0;
+      return {
+        id: Date.now() + Math.random(),
+        name: cleanName,
+        count: cleanCount,
+        price: cleanPrice,
+        courtesy: Boolean(item && item.courtesy) || cleanPrice === 0
+      };
+    }
+
+    function parseEventFileForMerge(text, fileName) {
+      const rawText = String(text || '').trim();
+      if (!rawText) throw new Error(`El archivo ${fileName} está vacío.`);
+
+      try {
+        const parsed = JSON.parse(rawText);
+        const data = parsed && parsed.data && Array.isArray(parsed.data.categories) ? parsed.data : parsed;
+        if (!data || !Array.isArray(data.categories)) {
+          throw new Error('No contiene una lista de localidades.');
+        }
+        const categories = data.categories.map(sanitizeImportedCategory).filter(item => item.name);
+        if (!categories.length) throw new Error('No se encontraron localidades válidas.');
+        return {
+          fileName,
+          eventName: String(data.eventName || parsed.eventName || fileName || 'Evento').trim(),
+          data,
+          categories
+        };
+      } catch (jsonError) {
+        try {
+          const categories = parseTableTxt(rawText).map(sanitizeImportedCategory).filter(item => item.name);
+          if (!categories.length) throw new Error('No se encontraron localidades válidas.');
+          return {
+            fileName,
+            eventName: String(fileName || 'Tabla importada').replace(/\.[^.]+$/, ''),
+            data: null,
+            categories
+          };
+        } catch (tableError) {
+          throw new Error(`El archivo ${fileName} no es un evento TXT válido ni una tabla TXT con columnas name, count y price.`);
+        }
+      }
+    }
+
+    function mergeEventCategories(eventFiles) {
+      const merged = new Map();
+      let duplicatedMatches = 0;
+      let priceConflicts = 0;
+
+      eventFiles.forEach((eventFile, fileIndex) => {
+        eventFile.categories.forEach((category) => {
+          const key = normalizeLocalityKey(category.name);
+          if (!key) return;
+
+          const incomingPrice = Number.isFinite(n(category.price)) ? Math.max(0, n(category.price)) : 0;
+          const incomingCount = Number.isFinite(n(category.count)) ? Math.max(0, n(category.count)) : 0;
+          const incomingCourtesy = Boolean(category.courtesy) || incomingPrice === 0;
+
+          if (!merged.has(key)) {
+            merged.set(key, {
+              id: Date.now() + Math.random(),
+              name: String(category.name || '').trim().replace(/\s+/g, ' '),
+              count: incomingCount,
+              price: incomingPrice,
+              courtesy: incomingCourtesy && incomingPrice === 0,
+              _sourceIndexes: new Set([fileIndex]),
+              _priceOptions: [incomingPrice]
+            });
+            return;
+          }
+
+          const current = merged.get(key);
+          if (!current._sourceIndexes.has(fileIndex)) duplicatedMatches += 1;
+          current._sourceIndexes.add(fileIndex);
+          current.count = round2(n(current.count) + incomingCount);
+
+          if (!current._priceOptions.some(price => round2(price) === round2(incomingPrice))) {
+            current._priceOptions.push(incomingPrice);
+            if (current._priceOptions.length > 1) priceConflicts += 1;
+          }
+
+          if (incomingPrice > n(current.price)) {
+            current.price = incomingPrice;
+            current.name = String(category.name || current.name).trim().replace(/\s+/g, ' ');
+          }
+
+          current.courtesy = n(current.price) === 0 && current.courtesy && incomingCourtesy;
+        });
+      });
+
+      const categories = Array.from(merged.values()).map((item, index) => ({
+        id: index + 1,
+        name: item.name,
+        count: item.count,
+        price: item.price,
+        courtesy: n(item.price) === 0 ? Boolean(item.courtesy) : false
+      }));
+
+      return { categories, duplicatedMatches, priceConflicts };
+    }
+
+    async function handleMergeEventsFiles(fileList) {
+      const files = Array.from(fileList || []);
+      if (files.length < 2) {
+        alert('Selecciona 2 o más archivos TXT de eventos para juntarlos.');
+        return;
+      }
+
+      try {
+        const texts = await Promise.all(files.map(readTextFile));
+        const eventFiles = texts.map((text, index) => parseEventFileForMerge(text, files[index].name));
+        const merged = mergeEventCategories(eventFiles);
+        const baseData = eventFiles[0].data || getSerializableState();
+        const mergedEventName = `Unión - ${eventFiles.map(item => item.eventName || item.fileName).join(' + ')}`;
+
+        loadSerializableState({
+          ...baseData,
+          activeTab: 'contador',
+          eventName: mergedEventName,
+          sheetRecordId: '',
+          categories: merged.categories
+        });
+        state.sheetRecordId = '';
+        localStorage.removeItem('sheetRecordId');
+        syncInputsFromState();
+        activateDetallePorLocalidad();
+
+        const totalBoletos = merged.categories.reduce((acc, item) => acc + n(item.count), 0);
+        const message = `Eventos unidos correctamente.\n\nLocalidades homologadas: ${merged.categories.length}\nBoletos totales: ${totalBoletos}\nCoincidencias sumadas entre archivos: ${merged.duplicatedMatches}\nLocalidades con precio diferente ajustadas al precio más alto: ${merged.priceConflicts}`;
+        if (typeof showWebMessage === 'function') {
+          showWebMessage(message, { title: 'Juntar eventos', autoClose: 6000 });
+        } else {
+          alert(message);
+        }
+      } catch (error) {
+        const message = error && error.message ? error.message : 'No se pudieron juntar los eventos.';
+        if (typeof showWebMessage === 'function') {
+          showWebMessage(message, { title: 'Error al juntar eventos', isError: true, autoClose: 6000 });
+        } else {
+          alert(message);
+        }
+      }
+    }
+
+
+    function getWebRecordId(record) {
+      return String(record && (record.recordId || record.eventName) || '').trim();
+    }
+
+    function updateMergeWebButtonState() {
+      const selected = Array.isArray(state.webMergeSelectedRecordIds) ? state.webMergeSelectedRecordIds : [];
+      const countEl = $('webMergeSelectedCount');
+      const btn = $('mergeWebEventsBtn');
+      if (countEl) countEl.textContent = `Seleccionados: ${selected.length} · mínimo 2`;
+      if (btn) {
+        btn.disabled = selected.length < 2;
+        btn.title = selected.length >= 2
+          ? `Unir ${selected.length} eventos seleccionados desde Web.`
+          : 'Marca 2 o más eventos en la tabla para unirlos.';
+      }
+    }
+
+    function toggleWebMergeSelection(recordId, checked) {
+      recordId = String(recordId || '').trim();
+      if (!recordId) return;
+      const current = Array.isArray(state.webMergeSelectedRecordIds) ? [...state.webMergeSelectedRecordIds] : [];
+      const exists = current.includes(recordId);
+
+      if (checked && !exists) {
+        current.push(recordId);
+      }
+
+      if (!checked && exists) {
+        const index = current.indexOf(recordId);
+        current.splice(index, 1);
+      }
+
+      state.webMergeSelectedRecordIds = current;
+      renderWebEventsList(state.webEventsRecords || []);
+    }
+
+    function normalizeWebEventForMerge(recordId, data) {
+      const container = data && data.data && Array.isArray(data.data.categories) ? data.data : data;
+      if (!container || !Array.isArray(container.categories)) {
+        throw new Error(`El evento ${recordId} no contiene una lista de localidades válida.`);
+      }
+      const categories = container.categories.map(sanitizeImportedCategory).filter(item => item.name);
+      if (!categories.length) {
+        throw new Error(`El evento ${recordId} no tiene localidades válidas para unir.`);
+      }
+      return {
+        fileName: recordId,
+        eventName: String(container.eventName || (data && data.eventName) || recordId || 'Evento Web').trim(),
+        data: container,
+        categories
+      };
+    }
+
+    function fetchWebRecordDataForMerge(recordId) {
+      const url = normalizeSheetUrl();
+      recordId = String(recordId || '').trim();
+      return new Promise((resolve, reject) => {
+        if (!url) {
+          reject(new Error('Falta la URL del Web App.'));
+          return;
+        }
+        if (!recordId) {
+          reject(new Error('Falta el ID del evento Web.'));
+          return;
+        }
+
+        const callbackName = `sheetMergeLoadCallback_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+        const script = document.createElement('script');
+        const sep = url.includes('?') ? '&' : '?';
+        let done = false;
+
+        const cleanup = () => {
+          if (done) return;
+          done = true;
+          delete window[callbackName];
+          script.remove();
+        };
+
+        window[callbackName] = (response) => {
+          cleanup();
+          if (!response || !response.ok) {
+            reject(new Error(response && response.error ? response.error : `No se encontró el evento Web: ${recordId}`));
+            return;
+          }
+          try {
+            resolve(normalizeWebEventForMerge(recordId, response.data || {}));
+          } catch (error) {
+            reject(error);
+          }
+        };
+
+        script.onerror = () => {
+          cleanup();
+          reject(new Error(`No se pudo cargar desde Web el evento: ${recordId}`));
+        };
+
+        setTimeout(() => {
+          if (done) return;
+          cleanup();
+          reject(new Error(`Tiempo agotado al cargar desde Web el evento: ${recordId}`));
+        }, 15000);
+
+        script.src = `${url}${sep}action=load&recordId=${encodeURIComponent(recordId)}&callback=${encodeURIComponent(callbackName)}&_=${Date.now()}`;
+        document.body.appendChild(script);
+      });
+    }
+
+    async function handleMergeWebEvents() {
+      const selectedIds = Array.isArray(state.webMergeSelectedRecordIds) ? [...state.webMergeSelectedRecordIds] : [];
+      if (selectedIds.length < 2) {
+        showWebMessage('Marca 2 o más eventos guardados Web para poder unirlos.', {
+          title: 'Unir eventos Web',
+          isError: true,
+          autoClose: 3600
+        });
+        return;
+      }
+
+      try {
+        setWebEventsLoading(true, `Cargando ${selectedIds.length} eventos seleccionados y homologando localidades.`, 'Uniendo eventos Web', 'merge');
+        const eventFiles = await Promise.all(selectedIds.map(fetchWebRecordDataForMerge));
+        const merged = mergeEventCategories(eventFiles);
+        const baseData = eventFiles[0].data || getSerializableState();
+        const mergedEventName = `Unión Web - ${eventFiles.map(item => item.eventName || item.fileName).join(' + ')}`;
+
+        loadSerializableState({
+          ...baseData,
+          activeTab: 'contador',
+          eventName: mergedEventName,
+          sheetRecordId: '',
+          categories: merged.categories
+        });
+
+        state.sheetRecordId = '';
+        state.webMergeSelectedRecordIds = [];
+        localStorage.removeItem('sheetRecordId');
+        syncInputsFromState();
+        activateDetallePorLocalidad();
+
+        const totalBoletos = merged.categories.reduce((acc, item) => acc + n(item.count), 0);
+        const message = `${selectedIds.length} eventos Web unidos correctamente.\n\nLocalidades homologadas: ${merged.categories.length}\nBoletos totales: ${totalBoletos}\nCoincidencias sumadas entre eventos: ${merged.duplicatedMatches}\nLocalidades con precio diferente ajustadas al precio más alto: ${merged.priceConflicts}\n\nEl resultado quedó cargado en “Detalle por localidad”.`;
+        showWebMessage(message, { title: 'Unión de eventos Web', autoClose: 7000 });
+        setSheetStatus('Eventos Web unidos. Revisa el resultado y guarda en Web si deseas conservarlo.');
+      } catch (error) {
+        const message = error && error.message ? error.message : 'No se pudieron unir los eventos Web.';
+        showWebMessage(message, { title: 'Error al unir eventos Web', isError: true, autoClose: 6500 });
+        setSheetStatus(message, true);
+      } finally {
+        setWebEventsLoading(false);
+      }
+    }
+
+
+    function focusDetallePorLocalidad() {
+      setTimeout(() => {
+        try {
+          const panel = $('viewContador');
+          if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+          const firstCountInput = document.querySelector('#categoriesTable input[data-kind="count"]');
+          if (firstCountInput) {
+            firstCountInput.focus({ preventScroll: true });
+            firstCountInput.select();
+            return;
+          }
+
+          const detalleTab = $('tabContador');
+          if (detalleTab) detalleTab.focus({ preventScroll: true });
+        } catch (error) {
+          console.warn('No se pudo enfocar Detalle por localidad.', error);
+        }
+      }, 90);
+    }
+
+    function activateDetallePorLocalidad() {
+      state.activeTab = 'contador';
+      render();
+      focusDetallePorLocalidad();
+    }
+
+    function updateCount(id, value) {
+      const item = state.categories.find(i => i.id === id);
+      if (!item) return;
+      item.count = Math.max(0, n(value));
+      render();
+    }
+
+    function promptAddToCount(id) {
+      const item = state.categories.find(i => i.id === id);
+      if (!item) return;
+
+      const backdrop = document.createElement('div');
+      backdrop.className = 'numeric-dialog-backdrop';
+      backdrop.innerHTML = `
+        <div class="numeric-dialog" role="dialog" aria-modal="true" aria-label="Sumar entradas">
+          <div class="numeric-dialog-title">Sumar entradas a "${escapeHtml(item.name)}"</div>
+          <div class="field">
+            <label>Cantidad a sumar</label>
+            <input id="numericPromptInput" type="number" inputmode="numeric" pattern="[0-9]*" min="0" step="1" value="1" autocomplete="off" />
+          </div>
+          <div class="numeric-dialog-actions">
+            <button type="button" id="numericPromptCancel">Cancelar</button>
+            <button type="button" id="numericPromptAccept" class="active">Sumar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(backdrop);
+
+      const input = backdrop.querySelector('#numericPromptInput');
+      const close = () => backdrop.remove();
+      const accept = () => {
+        const amount = Math.max(0, Math.floor(n(input.value)));
+        item.count += amount;
+        close();
+        render();
+      };
+
+      input.addEventListener('input', () => {
+        input.value = input.value.replace(/[^0-9]/g, '');
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') accept();
+        if (e.key === 'Escape') close();
+      });
+      backdrop.querySelector('#numericPromptCancel').onclick = close;
+      backdrop.querySelector('#numericPromptAccept').onclick = accept;
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) close();
+      });
+      setTimeout(() => input.focus(), 50);
+    }
+
+    function openReportPdf() {
+      const calc = compute();
+      const incomeRows = calc.boletosDetallados.map((row, index) => `
+        <tr>
+          <td style="padding:8px;border:1px solid #cbd5e1;text-align:center;">${index + 1}</td>
+          <td style="padding:8px;border:1px solid #cbd5e1;text-align:center;">${row.cantidadAsistentes}</td>
+          <td style="padding:8px;border:1px solid #cbd5e1;">${escapeHtml(row.localidad)}</td>
+          <td style="padding:8px;border:1px solid #cbd5e1;text-align:right;">${formatMoney(row.precioUnitario)}</td>
+          <td style="padding:8px;border:1px solid #cbd5e1;text-align:right;">${formatMoney(row.multiplicacion)}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="5" style="padding:8px;border:1px solid #cbd5e1;text-align:center;">Sin datos</td></tr>';
+
+      const reportHtml = `<!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <title>Reporte del evento</title>
+        <style>
+          body { font-family: Arial, Helvetica, sans-serif; color:#0f172a; margin:32px; }
+          h1 { margin:0 0 6px; font-size:24px; }
+          h2 { margin:24px 0 10px; font-size:18px; }
+          p { margin:4px 0; }
+          .box { border:1px solid #cbd5e1; border-radius:10px; padding:14px; margin-top:10px; }
+          .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+          table { width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+          th { background:#f1f5f9; }
+          th, td { border:1px solid #cbd5e1; padding:8px; }
+          .right { text-align:right; }
+          .center { text-align:center; }
+          @media print { body { margin:18px; } }
+        </style>
+      </head>
+      <body>
+        <h1>Reporte del evento</h1>
+        <p><strong>Identificación de evento:</strong> ${escapeHtml(state.eventName || 'Sin especificar')}</p>
+        <p><strong>Fecha de generación:</strong> ${new Date().toLocaleString('es-MX')}</p>
+
+        <h2>Factores de cálculo</h2>
+        <div class="grid">
+          <div class="box">
+            <p><strong>Estado</strong></p>
+            <p>Factor estatal: ${n(state.stateTaxRate).toFixed(2)}%</p>
+            <p>Factor multiplicador: x ${n(state.stateIncomeFactor)}</p>
+            <p>Interventores: ${n(state.stateInterventorCount)}</p>
+            <p>Honorario por interventor: ${formatMoney(state.stateInterventorFeePerPerson)}</p>
+            <p>Multas: ${formatMoney(state.stateFineAmount)}</p>
+            <p>Promedio localidades pagadas: ${formatMoney(calc.averagePaidLocalityPrice)}</p>
+            <p>Valor cortesías para estado: ${formatMoney(calc.courtesyEstimatedValueForState)}</p>
+            <p>Base impuesto estado: ${formatMoney(calc.stateTaxBase)}</p>
+          </div>
+          <div class="box">
+            <p><strong>Municipio</strong></p>
+            <p>Factor municipal: ${n(state.municipalTaxRate).toFixed(2)}%</p>
+            <p>Factor multiplicador: x ${n(state.municipalIncomeFactor)}</p>
+            <p>Interventores: ${n(state.municipalInterventorCount)}</p>
+            <p>Honorario por interventor: ${formatMoney(state.municipalInterventorFeePerPerson)}</p>
+            <p>Multas: ${formatMoney(state.municipalFineAmount)}</p>
+            <p>Base impuesto municipio: ${formatMoney(calc.municipalTaxBase)}</p>
+          </div>
+        </div>
+
+        <h2>Concentrado de asistentes por localidad</h2>
+        <table>
+          <thead>
+            <tr>
+              <th class="center">#</th>
+              <th class="center">Cantidad de asistentes</th>
+              <th>Localidad</th>
+              <th class="right">Precio unitario</th>
+              <th class="right">Multiplicación</th>
+            </tr>
+          </thead>
+          <tbody>${incomeRows}</tbody>
+        </table>
+
+        <h2>Resumen por nivel de gobierno</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Concepto</th>
+              <th class="right">Estado</th>
+              <th class="right">Municipio</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Impuestos</td>
+              <td class="right">${formatMoney(calc.stateTaxAmount)}</td>
+              <td class="right">${formatMoney(calc.municipalTaxAmount)}</td>
+            </tr>
+            <tr>
+              <td>Honorarios</td>
+              <td class="right">${formatMoney(calc.totalStateInterventorFee)}</td>
+              <td class="right">${formatMoney(calc.totalMunicipalInterventorFee)}</td>
+            </tr>
+            <tr>
+              <td>Multas</td>
+              <td class="right">${formatMoney(state.stateFineAmount)}</td>
+              <td class="right">${formatMoney(state.municipalFineAmount)}</td>
+            </tr>
+            <tr>
+              <td><strong>Total por gobierno</strong></td>
+              <td class="right"><strong>${formatMoney(calc.stateGovernmentTotal)}</strong></td>
+              <td class="right"><strong>${formatMoney(calc.municipalGovernmentTotal)}</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Total general</strong></td>
+              <td class="right" colspan="2"><strong>${formatMoney(calc.totalCharges)}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </body>
+      </html>`;
+
+      const reportWindow = window.open('', '_blank');
+      if (!reportWindow) {
+        alert('El navegador bloqueó la ventana del reporte. Permite ventanas emergentes para generar el PDF.');
+        return;
+      }
+
+      reportWindow.document.open();
+      reportWindow.document.write(reportHtml);
+      reportWindow.document.close();
+
+      const triggerPrint = () => {
+        try {
+          reportWindow.focus();
+          reportWindow.print();
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      reportWindow.onload = triggerPrint;
+      setTimeout(triggerPrint, 700);
+    }
+
+
+    let webMessageTimer = null;
+    let webMessageResolver = null;
+
+    function hideWebMessageModal(result = true) {
+      const modal = $('webMessageModal');
+      if (webMessageTimer) {
+        clearTimeout(webMessageTimer);
+        webMessageTimer = null;
+      }
+      if (modal) {
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+      if (webMessageResolver) {
+        const resolver = webMessageResolver;
+        webMessageResolver = null;
+        resolver(result);
+      }
+    }
+
+    function showWebMessage(message, options = {}) {
+      const modal = $('webMessageModal');
+      const box = $('webMessageBox');
+      const titleEl = $('webMessageTitle');
+      const textEl = $('webMessageText');
+      const actions = $('webMessageActions');
+      if (!modal || !box || !titleEl || !textEl || !actions) return Promise.resolve(true);
+
+      const {
+        title = 'Aviso',
+        isError = false,
+        autoClose = 2600,
+        confirm = false,
+        okText = 'Aceptar',
+        cancelText = 'Cancelar',
+        danger = false
+      } = options;
+
+      if (webMessageTimer) {
+        clearTimeout(webMessageTimer);
+        webMessageTimer = null;
+      }
+      if (webMessageResolver) {
+        const previousResolver = webMessageResolver;
+        webMessageResolver = null;
+        previousResolver(false);
+      }
+
+      titleEl.textContent = title;
+      textEl.textContent = message || '';
+      box.classList.toggle('error', Boolean(isError));
+      actions.innerHTML = '';
+
+      return new Promise(resolve => {
+        webMessageResolver = resolve;
+
+        if (confirm) {
+          const cancelBtn = document.createElement('button');
+          cancelBtn.type = 'button';
+          cancelBtn.textContent = cancelText;
+          cancelBtn.onclick = () => hideWebMessageModal(false);
+
+          const okBtn = document.createElement('button');
+          okBtn.type = 'button';
+          okBtn.textContent = okText;
+          okBtn.className = danger ? 'danger' : 'active';
+          okBtn.onclick = () => hideWebMessageModal(true);
+
+          actions.appendChild(cancelBtn);
+          actions.appendChild(okBtn);
+          setTimeout(() => okBtn.focus(), 50);
+        } else {
+          const okBtn = document.createElement('button');
+          okBtn.type = 'button';
+          okBtn.textContent = okText;
+          okBtn.className = 'active';
+          okBtn.onclick = () => hideWebMessageModal(true);
+          actions.appendChild(okBtn);
+          if (autoClose) webMessageTimer = setTimeout(() => hideWebMessageModal(true), autoClose);
+          setTimeout(() => okBtn.focus(), 50);
+        }
+
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+      });
+    }
+
+    function shouldShowStatusInForeground(message, isError = false) {
+      const txt = String(message || '').trim();
+      if (!txt) return false;
+      // Solo los errores se muestran en primer plano desde los procesos Web.
+      // Los mensajes informativos quedan únicamente en el estado del panel para no interrumpir el flujo.
+      return Boolean(isError);
+    }
+
+    function setSheetStatus(message, isError = false) {
+      const el = $('sheetStatus');
+      if (el) {
+        el.textContent = message || '';
+        el.style.color = isError ? 'var(--danger)' : 'var(--muted)';
+        el.style.display = message ? 'block' : 'none';
+      }
+      if (shouldShowStatusInForeground(message, isError)) {
+        showWebMessage(message, {
+          title: 'Aviso Web',
+          isError,
+          autoClose: 4200
+        });
+      }
+    }
+
+    function normalizeSheetUrl() {
+      const url = FIXED_SHEET_WEB_APP_URL;
+      state.sheetWebAppUrl = url;
+      if ($('sheetWebAppUrl')) $('sheetWebAppUrl').value = url;
+      return url;
+    }
+
+    function normalizeSheetRecordId() {
+      const eventInput = $('eventName');
+      if (eventInput) state.eventName = eventInput.value.trim();
+      const recordId = String(state.eventName || '').trim();
+      if (!recordId) {
+        setSheetStatus('Captura el nombre del evento para guardar o cargar en Web.', true);
+        if (eventInput) eventInput.focus();
+        return '';
+      }
+      state.sheetRecordId = recordId;
+      localStorage.setItem('sheetRecordId', recordId);
+      return recordId;
+    }
+
+    function getSheetPayload() {
+      const calc = compute();
+      return {
+        action: 'save',
+        recordId: normalizeSheetRecordId(),
+        updatedAt: new Date().toISOString(),
+        eventName: state.eventName || '',
+        summary: {
+          totalPersons: calc.totalPersons,
+          payingPersons: calc.payingPersons,
+          courtesyPersons: calc.courtesyPersons,
+          grossIncome: calc.grossIncome,
+          totalCharges: calc.totalCharges
+        },
+        data: getSerializableState()
+      };
+    }
+
+    function checkExistingWebRecord(url, recordId) {
+      return new Promise((resolve) => {
+        const callbackName = `sheetCheckCallback_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+        const script = document.createElement('script');
+        const sep = url.includes('?') ? '&' : '?';
+        let done = false;
+
+        const cleanup = () => {
+          if (done) return;
+          done = true;
+          delete window[callbackName];
+          script.remove();
+        };
+
+        window[callbackName] = (response) => {
+          cleanup();
+          resolve(Boolean(response && response.ok && response.data));
+        };
+
+        script.onerror = () => {
+          cleanup();
+          resolve(false);
+        };
+
+        setTimeout(() => {
+          cleanup();
+          resolve(false);
+        }, 10000);
+
+        script.src = `${url}${sep}action=load&recordId=${encodeURIComponent(recordId)}&callback=${encodeURIComponent(callbackName)}&_=${Date.now()}`;
+        document.body.appendChild(script);
+      });
+    }
+
+    async function sendPayloadToWeb(url, payload) {
+      await fetch(url, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    function getSequencedBaseName(recordId) {
+      const clean = String(recordId || '').trim();
+      // Regresa al formato con paréntesis: "Evento (2)".
+      // Si el nombre actual ya trae una secuencia, se toma el nombre base.
+      const withoutParenthesis = clean.replace(/\s*\(\d+\)\s*$/, '').trim();
+      const withoutOldPlainNumber = withoutParenthesis.replace(/(.*?)(\d+)$/, (match, namePart) => {
+        const base = String(namePart || '').trimEnd();
+        return base || match;
+      }).trim();
+      return withoutOldPlainNumber || clean;
+    }
+
+    async function getAvailableWebRecordId(url, desiredRecordId) {
+      const originalId = String(desiredRecordId || '').trim();
+      const existsOriginal = await checkExistingWebRecord(url, originalId);
+      if (!existsOriginal) {
+        return { recordId: originalId, wasSequenced: false };
+      }
+
+      const baseName = getSequencedBaseName(originalId) || originalId;
+      for (let index = 2; index <= 999; index++) {
+        const candidate = `${baseName} (${index})`;
+        const existsCandidate = await checkExistingWebRecord(url, candidate);
+        if (!existsCandidate) {
+          return { recordId: candidate, wasSequenced: true };
+        }
+      }
+
+      const fallback = `${baseName} (${Date.now()})`;
+      return { recordId: fallback, wasSequenced: true };
+    }
+
+    function setCurrentEventRecordId(recordId) {
+      const cleanRecordId = String(recordId || '').trim();
+      state.eventName = cleanRecordId;
+      state.sheetRecordId = cleanRecordId;
+      localStorage.setItem('sheetRecordId', cleanRecordId);
+      if ($('eventName')) $('eventName').value = cleanRecordId;
+    }
+
+    async function saveToGoogleSheet() {
+      if (isWebSaveInProgress) return;
+
+      const url = normalizeSheetUrl();
+      if (!url) {
+        setSheetStatus('Falta la URL del Web App.', true);
+        return;
+      }
+      try {
+        if (document.activeElement && document.activeElement.dataset && document.activeElement.dataset.kind) {
+          applyManualTableFieldValue(document.activeElement);
+        }
+
+        const requestedRecordId = normalizeSheetRecordId();
+        if (!requestedRecordId) return;
+
+        if (!hasUnsavedWebChanges()) {
+          setSheetStatus('No hay cambios nuevos por guardar.');
+          return;
+        }
+
+        isWebSaveInProgress = true;
+        setWebEventsLoading(true, 'Validando el nombre del evento y guardando la información en Web.', 'Guardando datos Web', 'save');
+        setSheetStatus('Validando nombre del evento en Web...');
+        const available = await getAvailableWebRecordId(url, requestedRecordId);
+        if (available.wasSequenced) {
+          setCurrentEventRecordId(available.recordId);
+          render();
+          setSheetStatus(`El evento ya existía. Se guardará como: ${available.recordId}`);
+        }
+
+        const payload = getSheetPayload();
+        if (!payload.recordId) return;
+
+        setSheetStatus('Guardando en Web...');
+        await sendPayloadToWeb(url, payload);
+        markWebSaveBaseline();
+
+        if (available.wasSequenced) {
+          setSheetStatus(`Datos enviados correctamente. Guardado como: ${available.recordId}`);
+        } else {
+          setSheetStatus('Datos enviados correctamente');
+        }
+      } catch (error) {
+        console.error(error);
+        setSheetStatus('No se pudo guardar en Web.', true);
+      } finally {
+        isWebSaveInProgress = false;
+        setWebEventsLoading(false);
+      }
+    }
+
+    function loadFromGoogleSheet() {
+      const recordId = normalizeSheetRecordId();
+      if (!recordId) return;
+      loadWebRecordById(recordId);
+    }
+
+
+    function getCurrentWebRecordIdForAutoSave() {
+      const eventInput = $('eventName');
+      if (eventInput) state.eventName = eventInput.value.trim();
+      const recordId = String(state.eventName || '').trim();
+      if (!recordId) return '';
+      state.sheetRecordId = recordId;
+      localStorage.setItem('sheetRecordId', recordId);
+      return recordId;
+    }
+
+    function getWebPayloadForAutoSave() {
+      const recordId = getCurrentWebRecordIdForAutoSave();
+      if (!recordId) return null;
+      const calc = compute();
+      return {
+        // En cierre/actualización no se puede esperar una validación previa del navegador.
+        // Por eso el Apps Script debe guardar con ID secuenciado si ya existe: Evento (2), Evento (3), etc.
+        action: 'saveSequenced',
+        recordId,
+        updatedAt: new Date().toISOString(),
+        eventName: state.eventName || '',
+        autoSave: true,
+        summary: {
+          totalPersons: calc.totalPersons,
+          payingPersons: calc.payingPersons,
+          courtesyPersons: calc.courtesyPersons,
+          grossIncome: calc.grossIncome,
+          totalCharges: calc.totalCharges
+        },
+        data: getSerializableState()
+      };
+    }
+
+    function saveToWebOnExit() {
+      try {
+        if (exitAutoSaveAlreadySent) return;
+        if (isWebSaveInProgress) return;
+
+        const url = normalizeSheetUrl();
+        if (!url) return;
+        if (document.activeElement && document.activeElement.dataset && document.activeElement.dataset.kind) {
+          applyManualTableFieldValue(document.activeElement);
+        }
+        if (!hasUnsavedWebChanges()) return;
+
+        const payload = getWebPayloadForAutoSave();
+        if (!payload) return;
+
+        exitAutoSaveAlreadySent = true;
+        setWebEventsLoading(true, 'Guardando automáticamente los cambios antes de salir.', 'Autoguardando datos Web', 'save');
+        const body = JSON.stringify(payload);
+        if (navigator.sendBeacon) {
+          const blob = new Blob([body], { type: 'text/plain;charset=utf-8' });
+          navigator.sendBeacon(url, blob);
+        } else {
+          fetch(url, {
+            method: 'POST',
+            mode: 'no-cors',
+            keepalive: true,
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body
+          }).catch(() => {});
+        }
+        setTimeout(() => setWebEventsLoading(false), 1200);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function bindAutoSaveBeforeExit() {
+      // Se usa pagehide como único punto real de autoguardado para evitar registros duplicados.
+      window.addEventListener('pagehide', saveToWebOnExit, { capture: true });
+      window.addEventListener('beforeunload', (event) => {
+        if (getCurrentWebRecordIdForAutoSave() && hasUnsavedWebChanges()) {
+          event.preventDefault();
+          event.returnValue = '';
+        }
+      });
+    }
+
+    function loadWebRecordById(recordId) {
+      const url = normalizeSheetUrl();
+      recordId = String(recordId || '').trim();
+      if (!recordId) {
+        return;
+      }
+      if (!url) {
+        setSheetStatus('Falta la URL del Web App.', true);
+        return;
+      }
+
+      setWebEventsLoading(true, `Cargando el evento guardado en Web: ${recordId}`, 'Cargando datos Web', 'load');
+      const callbackName = `sheetLoadCallback_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+      const script = document.createElement('script');
+      const sep = url.includes('?') ? '&' : '?';
+      let done = false;
+      const cleanup = () => {
+        done = true;
+        delete window[callbackName];
+        script.remove();
+      };
+
+      window[callbackName] = (response) => {
+        cleanup();
+        setWebEventsLoading(false);
+        if (!response || !response.ok) {
+          const msg = response && response.error ? response.error : 'No se encontró el evento en Web.';
+          setSheetStatus(msg, true);
+          return;
+        }
+        loadSerializableState(response.data || {});
+        state.sheetWebAppUrl = url;
+        state.sheetRecordId = recordId;
+        localStorage.setItem('sheetWebAppUrl', url);
+        localStorage.setItem('sheetRecordId', recordId);
+        syncInputsFromState();
+        activateDetallePorLocalidad();
+        markWebSaveBaseline();
+        setSheetStatus(`Evento cargado desde Web: ${recordId}`);
+      };
+
+      script.onerror = () => {
+        if (done) return;
+        cleanup();
+        setWebEventsLoading(false);
+        setSheetStatus('No se pudo cargar desde Web.', true);
+      };
+
+      setTimeout(() => {
+        if (done) return;
+        cleanup();
+        setWebEventsLoading(false);
+        setSheetStatus('Tiempo agotado al cargar desde Web.', true);
+      }, 12000);
+
+      setSheetStatus('Cargando desde Web...');
+      script.src = `${url}${sep}action=load&recordId=${encodeURIComponent(recordId)}&callback=${encodeURIComponent(callbackName)}&_=${Date.now()}`;
+      document.body.appendChild(script);
+    }
+
+    function formatWebDate(isoValue) {
+      if (!isoValue) return '';
+      const d = new Date(isoValue);
+      if (Number.isNaN(d.getTime())) return String(isoValue);
+      return d.toLocaleString('es-MX');
+    }
+
+    function getWebRecordSortValue(record, key) {
+      if (!record) return '';
+      if (key === 'recordId') return String(record.recordId || record.eventName || '').toLowerCase();
+      if (key === 'updatedAt') {
+        const d = new Date(record.updatedAt || record.createdAt || '');
+        return Number.isNaN(d.getTime()) ? 0 : d.getTime();
+      }
+      if (key === 'totalPersons') return n(record.totalPersons);
+      if (key === 'grossIncome') return n(record.grossIncome);
+      if (key === 'totalCharges') return n(record.totalCharges);
+      return String(record[key] || '').toLowerCase();
+    }
+
+    function sortWebEventsRecords(records) {
+      const key = state.webEventsSortKey || 'updatedAt';
+      const dir = state.webEventsSortDir === 'asc' ? 1 : -1;
+      return [...(Array.isArray(records) ? records : [])].sort((a, b) => {
+        const av = getWebRecordSortValue(a, key);
+        const bv = getWebRecordSortValue(b, key);
+        if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
+        return String(av).localeCompare(String(bv), 'es', { numeric: true, sensitivity: 'base' }) * dir;
+      });
+    }
+
+    function updateWebEventsSortIndicators() {
+      document.querySelectorAll('[data-web-sort]').forEach(th => {
+        const active = th.dataset.webSort === state.webEventsSortKey;
+        th.classList.toggle('web-sort-active', active);
+        th.setAttribute('aria-sort', active ? (state.webEventsSortDir === 'asc' ? 'ascending' : 'descending') : 'none');
+        th.setAttribute('data-sort-symbol', state.webEventsSortDir === 'asc' ? '▲' : '▼');
+        th.title = 'Clic para ordenar por este encabezado';
+      });
+    }
+
+    function setWebEventsSort(key) {
+      if (!key) return;
+      if (state.webEventsSortKey === key) {
+        state.webEventsSortDir = state.webEventsSortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.webEventsSortKey = key;
+        state.webEventsSortDir = key === 'updatedAt' ? 'desc' : 'asc';
+      }
+      renderWebEventsList(state.webEventsRecords || []);
+    }
+
+    function renderWebEventsList(records) {
+      const tbody = $('webEventsTable');
+      if (!tbody) return;
+      state.webEventsRecords = Array.isArray(records) ? records : [];
+      updateWebEventsSortIndicators();
+
+      const validRecordIds = new Set(state.webEventsRecords.map(getWebRecordId).filter(Boolean));
+      state.webMergeSelectedRecordIds = (Array.isArray(state.webMergeSelectedRecordIds) ? state.webMergeSelectedRecordIds : [])
+        .filter(recordId => validRecordIds.has(recordId));
+
+      const sortedRecords = sortWebEventsRecords(state.webEventsRecords);
+      if (!sortedRecords.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="web-events-empty">No se encontraron eventos con esos filtros.</td></tr>';
+        updateMergeWebButtonState();
+        return;
+      }
+      tbody.innerHTML = sortedRecords.map((record, index) => {
+        const recordIdText = getWebRecordId(record);
+        const recordId = escapeHtml(recordIdText);
+        const isSelected = (state.webMergeSelectedRecordIds || []).includes(recordIdText);
+        return `
+          <tr class="web-event-row${isSelected ? ' merge-selected' : ''}" data-web-record-index="${index}">
+            <td class="center web-col-merge"><input type="checkbox" class="web-event-merge-check" data-web-merge-index="${index}" ${isSelected ? 'checked' : ''} aria-label="Seleccionar ${recordId} para unir" /></td>
+            <td class="web-cell-clip web-col-id" title="${recordId}"><strong>${recordId}</strong></td>
+            <td class="web-cell-clip web-col-date" title="${escapeHtml(formatWebDate(record.updatedAt))}">${escapeHtml(formatWebDate(record.updatedAt))}</td>
+            <td class="right web-col-money">${formatMoney(record.grossIncome)}</td>
+            <td class="right web-col-money">${formatMoney(record.totalCharges)}</td>
+            <td class="center web-col-load"><button type="button" class="small active" data-web-load-index="${index}">Cargar</button></td>
+          </tr>
+        `;
+      }).join('');
+      tbody.querySelectorAll('[data-web-merge-index]').forEach(input => {
+        input.onchange = () => {
+          const record = sortedRecords[n(input.dataset.webMergeIndex)];
+          toggleWebMergeSelection(getWebRecordId(record), input.checked);
+        };
+        input.onclick = (e) => e.stopPropagation();
+      });
+      tbody.querySelectorAll('[data-web-load-index]').forEach(btn => {
+        btn.onclick = () => {
+          const record = sortedRecords[n(btn.dataset.webLoadIndex)];
+          loadWebRecordById(record && (record.recordId || record.eventName));
+        };
+      });
+      updateMergeWebButtonState();
+      bindWebEventsRowContextMenus(sortedRecords);
+    }
+
+    function ensureWebEventsContextMenu() {
+      let menu = document.getElementById('webEventsContextMenu');
+      if (menu) return menu;
+      menu = document.createElement('div');
+      menu.id = 'webEventsContextMenu';
+      menu.className = 'manual-context-menu';
+      menu.innerHTML = `
+        <div class="manual-context-hint">Opciones del evento</div>
+        <button type="button" class="danger" data-web-context-action="delete">Borrar evento</button>
+      `;
+      document.body.appendChild(menu);
+      menu.addEventListener('click', (e) => {
+        const action = e.target.closest('[data-web-context-action]');
+        if (!action) return;
+        const recordId = menu.dataset.recordId || '';
+        hideWebEventsContextMenu();
+        if (action.dataset.webContextAction === 'delete') deleteWebRecordById(recordId);
+      });
+      return menu;
+    }
+
+    function hideWebEventsContextMenu() {
+      const menu = document.getElementById('webEventsContextMenu');
+      if (!menu) return;
+      menu.classList.remove('show');
+      menu.dataset.recordId = '';
+    }
+
+    function showWebEventsContextMenu(recordId, clientX, clientY) {
+      recordId = String(recordId || '').trim();
+      if (!recordId) return;
+      hideManualContextMenu();
+      const menu = ensureWebEventsContextMenu();
+      menu.dataset.recordId = recordId;
+      menu.classList.add('show');
+
+      const margin = 8;
+      const rect = menu.getBoundingClientRect();
+      const maxX = window.innerWidth - rect.width - margin;
+      const maxY = window.innerHeight - rect.height - margin;
+      menu.style.left = `${Math.max(margin, Math.min(clientX, maxX))}px`;
+      menu.style.top = `${Math.max(margin, Math.min(clientY, maxY))}px`;
+    }
+
+    function bindWebEventsRowContextMenus(records) {
+      document.querySelectorAll('.web-event-row').forEach(row => {
+        const index = n(row.dataset.webRecordIndex);
+        const record = Array.isArray(records) ? records[index] : null;
+        const recordId = record && (record.recordId || record.eventName);
+        let longPressTimer = null;
+        let touchStart = null;
+
+        row.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          showWebEventsContextMenu(recordId, e.clientX, e.clientY);
+        });
+
+        row.addEventListener('touchstart', (e) => {
+          if (e.target.closest('input, textarea, select, button, label')) return;
+          const touch = e.touches && e.touches[0];
+          if (!touch) return;
+          touchStart = { x: touch.clientX, y: touch.clientY };
+          clearTimeout(longPressTimer);
+          longPressTimer = setTimeout(() => {
+            showWebEventsContextMenu(recordId, touchStart.x, touchStart.y);
+          }, 650);
+        }, { passive: true });
+
+        row.addEventListener('touchmove', (e) => {
+          const touch = e.touches && e.touches[0];
+          if (!touch || !touchStart) return;
+          if (Math.abs(touch.clientX - touchStart.x) > 12 || Math.abs(touch.clientY - touchStart.y) > 12) {
+            clearTimeout(longPressTimer);
+          }
+        }, { passive: true });
+
+        ['touchend', 'touchcancel'].forEach(evt => {
+          row.addEventListener(evt, () => clearTimeout(longPressTimer), { passive: true });
+        });
+      });
+    }
+
+    async function deleteWebRecordById(recordId) {
+      const url = normalizeSheetUrl();
+      recordId = String(recordId || '').trim();
+      if (!recordId) {
+        return;
+      }
+      if (!url) {
+        setSheetStatus('Falta la URL del Web App.', true);
+        return;
+      }
+      const confirmDelete = await showWebMessage(`¿Deseas borrar el evento guardado en Web?\n\n${recordId}`, {
+        title: 'Confirmar borrado',
+        confirm: true,
+        okText: 'Borrar',
+        cancelText: 'Cancelar',
+        danger: true,
+        autoClose: 0
+      });
+      if (!confirmDelete) return;
+      setWebEventsLoading(true, `Borrando el evento guardado en Web: ${recordId}`, 'Borrando datos Web', 'delete');
+      const callbackName = `sheetDeleteCallback_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+      const script = document.createElement('script');
+      const sep = url.includes('?') ? '&' : '?';
+      let done = false;
+      const cleanup = () => {
+        done = true;
+        delete window[callbackName];
+        script.remove();
+      };
+
+      window[callbackName] = (response) => {
+        cleanup();
+        setWebEventsLoading(false);
+        if (!response || !response.ok) {
+          const msg = response && response.error ? response.error : 'No se pudo borrar el evento.';
+          setSheetStatus(msg, true);
+          return;
+        }
+        setSheetStatus(`Evento borrado: ${recordId}`);
+        refreshWebEventsList();
+      };
+
+      script.onerror = () => {
+        if (done) return;
+        cleanup();
+        setWebEventsLoading(false);
+        setSheetStatus('No se pudo borrar el evento en Web.', true);
+      };
+
+      setTimeout(() => {
+        if (done) return;
+        cleanup();
+        setWebEventsLoading(false);
+        setSheetStatus('Tiempo agotado al borrar el evento.', true);
+      }, 12000);
+
+      setSheetStatus('Borrando evento en Web...');
+      script.src = `${url}${sep}action=delete&recordId=${encodeURIComponent(recordId)}&callback=${encodeURIComponent(callbackName)}&_=${Date.now()}`;
+      document.body.appendChild(script);
+    }
+
+
+    function setWebEventsLoading(isLoading, message = 'Procesando datos Web. Espera a que termine el proceso.', title = 'Procesando datos Web', action = '') {
+      const overlay = $('webEventsLoading');
+      if (!overlay) return;
+      const titleEl = $('webEventsLoadingTitle');
+      const text = $('webEventsLoadingText');
+      if (titleEl) titleEl.textContent = title;
+      if (text) text.textContent = message;
+      overlay.classList.toggle('show', Boolean(isLoading));
+      overlay.setAttribute('aria-hidden', isLoading ? 'false' : 'true');
+
+      const buttons = [
+        { id: 'refreshWebEventsBtn', loadingText: action === 'search' ? 'Buscando...' : null },
+        { id: 'saveSheetBtn', loadingText: action === 'save' ? 'Guardando...' : null },
+        { id: 'loadSheetBtn', loadingText: action === 'load' ? 'Cargando...' : null },
+        { id: 'mergeWebEventsBtn', loadingText: action === 'merge' ? 'Uniendo...' : null }
+      ];
+
+      buttons.forEach(({ id, loadingText }) => {
+        const btn = $(id);
+        if (!btn) return;
+        if (!btn.dataset.defaultText) btn.dataset.defaultText = btn.textContent;
+        btn.disabled = Boolean(isLoading);
+        btn.textContent = isLoading && loadingText ? loadingText : btn.dataset.defaultText;
+      });
+    }
+
+    function refreshWebEventsList() {
+      const url = normalizeSheetUrl();
+      if (!url) {
+        return;
+      }
+      const idFilter = $('webEventFilterId') ? $('webEventFilterId').value.trim() : '';
+      const dateFrom = $('webEventDateFrom') ? $('webEventDateFrom').value : '';
+      const dateTo = $('webEventDateTo') ? $('webEventDateTo').value : '';
+      const tbody = $('webEventsTable');
+      state.webMergeSelectedRecordIds = [];
+      updateMergeWebButtonState();
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="web-events-empty">Buscando eventos guardados...</td></tr>';
+      setWebEventsLoading(true, 'Buscando eventos guardados en Web. Espera a que termine la consulta.', 'Buscando eventos guardados', 'search');
+
+      const callbackName = `sheetListCallback_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+      const script = document.createElement('script');
+      const sep = url.includes('?') ? '&' : '?';
+      let done = false;
+      const cleanup = () => {
+        done = true;
+        delete window[callbackName];
+        script.remove();
+      };
+
+      window[callbackName] = (response) => {
+        cleanup();
+        setWebEventsLoading(false);
+        if (!response || !response.ok) {
+          const msg = response && response.error ? response.error : 'No se pudo obtener la lista de eventos.';
+          renderWebEventsList([]);
+          setSheetStatus(msg, true);
+          return;
+        }
+        renderWebEventsList(response.records || []);
+        setSheetStatus(`Eventos encontrados: ${(response.records || []).length}`);
+      };
+
+      script.onerror = () => {
+        if (done) return;
+        cleanup();
+        setWebEventsLoading(false);
+        renderWebEventsList([]);
+        setSheetStatus('No se pudo consultar la lista de eventos.', true);
+      };
+
+      setTimeout(() => {
+        if (done) return;
+        cleanup();
+        setWebEventsLoading(false);
+        renderWebEventsList([]);
+        setSheetStatus('Tiempo agotado al consultar eventos.', true);
+      }, 12000);
+
+      script.src = `${url}${sep}action=list&idFilter=${encodeURIComponent(idFilter)}&dateFrom=${encodeURIComponent(dateFrom)}&dateTo=${encodeURIComponent(dateTo)}&callback=${encodeURIComponent(callbackName)}&_=${Date.now()}`;
+      document.body.appendChild(script);
+    }
+
+    function bindTopInputs() {
+      $('eventName').oninput = e => { state.eventName = e.target.value; };
+      if ($('sheetWebAppUrl')) $('sheetWebAppUrl').value = FIXED_SHEET_WEB_APP_URL;
+      if ($('saveSheetBtn')) $('saveSheetBtn').onclick = () => { collapsePanelById('web'); saveToGoogleSheet(); };
+      if ($('loadSheetBtn')) $('loadSheetBtn').onclick = () => { collapsePanelById('web'); loadFromGoogleSheet(); };
+      if ($('refreshWebEventsBtn')) $('refreshWebEventsBtn').onclick = () => { collapsePanelById('web'); refreshWebEventsList(); };
+      if ($('mergeWebEventsBtn')) $('mergeWebEventsBtn').onclick = () => { collapsePanelById('web'); handleMergeWebEvents(); };
+      document.querySelectorAll('[data-web-sort]').forEach(th => {
+        th.onclick = () => setWebEventsSort(th.dataset.webSort);
+        th.setAttribute('tabindex', '0');
+        th.setAttribute('role', 'button');
+        th.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setWebEventsSort(th.dataset.webSort);
+          }
+        });
+      });
+      document.querySelectorAll('[data-manual-sort]').forEach(th => {
+        th.onclick = () => setManualCategorySort(th.dataset.manualSort);
+        th.setAttribute('tabindex', '0');
+        th.setAttribute('role', 'button');
+        th.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setManualCategorySort(th.dataset.manualSort);
+          }
+        });
+      });
+      ['webEventFilterId','webEventDateFrom','webEventDateTo'].forEach(id => {
+        if ($(id)) {
+          $(id).addEventListener('keydown', e => {
+            if (e.key === 'Enter') refreshWebEventsList();
+          });
+        }
+      });
+      $('resetCountsBtn').onclick = () => {
+        if (!confirm('¿Deseas reiniciar todos los contadores?')) return;
+        state.categories = state.categories.map(item => ({ ...item, count: 0 }));
+        state.selectedRowId = null;
+        render();
+      };
+      $('importTableBtn').onclick = () => { collapsePanelById('archivos'); $('importTableInput').click(); };
+      $('importTableInput').onchange = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) handleImportTableTxt(file);
+        e.target.value = '';
+      };
+      if ($('mergeEventsBtn')) $('mergeEventsBtn').onclick = () => { collapsePanelById('archivos'); $('mergeEventsInput').click(); };
+      if ($('mergeEventsInput')) $('mergeEventsInput').onchange = (e) => {
+        const files = e.target.files;
+        if (files && files.length) handleMergeEventsFiles(files);
+        e.target.value = '';
+      };
+      $('generatePdfBtn').onclick = () => { collapsePanelById('archivos'); openReportPdf(); };
+      $('saveTxtBtn').onclick = () => { collapsePanelById('archivos'); saveTxtFile(); };
+      $('loadTxtBtn').onclick = () => { collapsePanelById('archivos'); $('loadTxtInput').click(); };
+      $('loadTxtInput').onchange = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) handleLoadTxt(file);
+        e.target.value = '';
+      };
+    }
+
+    function bindTaxInputs() {
+      [
+        'stateTaxRate','municipalTaxRate','stateIncomeFactor','municipalIncomeFactor','stateInterventorCount','stateInterventorFeePerPerson',
+        'stateFineAmount','municipalInterventorCount','municipalInterventorFeePerPerson','municipalFineAmount'
+      ].forEach(id => {
+        $(id).oninput = e => {
+          const value = String(e.target.value || '');
+          state[id] = n(value);
+          if (!value.endsWith('.')) render();
+        };
+      });
+    }
+
+
+    function cleanNumericValue(value, mode = 'decimal') {
+      let txt = String(value || '');
+      if (mode === 'numeric') {
+        return txt.replace(/[^0-9]/g, '');
+      }
+
+      const allowNegative = mode === 'signedDecimal';
+      txt = txt
+        .replace(/,/g, '.')
+        .replace(allowNegative ? /[^0-9.\-]/g : /[^0-9.]/g, '');
+
+      if (allowNegative) {
+        const isNegative = txt.startsWith('-');
+        txt = txt.replace(/-/g, '');
+        if (isNegative) txt = '-' + txt;
+      }
+
+      const dotSearchStart = allowNegative && txt.startsWith('-') ? 1 : 0;
+      const firstDot = txt.indexOf('.', dotSearchStart);
+      if (firstDot !== -1) {
+        txt = txt.slice(0, firstDot + 1) + txt.slice(firstDot + 1).replace(/\./g, '');
+      }
+      return txt;
+    }
+
+    function configureNumericInput(input, mode = 'decimal') {
+      // type="text" evita que el navegador permita letras como "e" en campos number.
+      // inputmode mantiene el teclado numérico/decimal en celulares y tablets.
+      input.setAttribute('type', 'text');
+      input.setAttribute('inputmode', mode === 'numeric' ? 'numeric' : 'decimal');
+      input.setAttribute('autocomplete', 'off');
+      input.setAttribute('autocorrect', 'off');
+      input.setAttribute('spellcheck', 'false');
+      input.setAttribute('pattern', mode === 'numeric' ? '[0-9]*' : (mode === 'signedDecimal' ? '-?[0-9]*[.]?[0-9]*' : '[0-9]*[.]?[0-9]*'));
+
+      input.addEventListener('beforeinput', (e) => {
+        if (!e.data) return;
+        const allowed = mode === 'numeric' ? /^[0-9]+$/ : (mode === 'signedDecimal' ? /^[0-9.,-]+$/ : /^[0-9.,]+$/);
+        if (!allowed.test(e.data)) e.preventDefault();
+      });
+
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text');
+        const start = input.selectionStart ?? input.value.length;
+        const end = input.selectionEnd ?? input.value.length;
+        const next = input.value.slice(0, start) + pasted + input.value.slice(end);
+        input.value = cleanNumericValue(next, mode);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+
+      input.addEventListener('input', () => {
+        const cleaned = cleanNumericValue(input.value, mode);
+        if (input.value !== cleaned) input.value = cleaned;
+      });
+    }
+
+    function configureAllNumericInputs(scope = document) {
+      const numericSelector = [
+        'input[type="number"]',
+        'input[inputmode="decimal"]',
+        'input[inputmode="numeric"]',
+        'input[data-kind="price"]',
+        'input[data-kind="count"]',
+        '#newCategoryPrice',
+        '#stateTaxRate',
+        '#municipalTaxRate',
+        '#stateIncomeFactor',
+        '#municipalIncomeFactor',
+        '#stateInterventorCount',
+        '#stateInterventorFeePerPerson',
+        '#stateFineAmount',
+        '#municipalInterventorCount',
+        '#municipalInterventorFeePerPerson',
+        '#municipalFineAmount'
+      ].join(',');
+
+      scope.querySelectorAll(numericSelector).forEach(input => {
+        if (input.dataset.numericConfigured === '1') return;
+        input.dataset.numericConfigured = '1';
+        const kind = input.dataset.kind || input.id || '';
+        const integerOnly = kind.includes('count') || kind.includes('new-count') || kind.includes('InterventorCount');
+        const signedDecimal = kind === 'stateFineAmount' || kind === 'municipalFineAmount';
+        configureNumericInput(input, integerOnly ? 'numeric' : (signedDecimal ? 'signedDecimal' : 'decimal'));
+      });
+    }
+
+
+    function syncNewCategoryDraftFromRow(sourceEl = document.activeElement) {
+      const row = sourceEl && sourceEl.closest ? sourceEl.closest('.new-category-row') : null;
+      const scope = row || document;
+      const nameInput = scope.querySelector('[data-kind="new-name"]');
+      const priceInput = scope.querySelector('[data-kind="new-price"]');
+      const countInput = scope.querySelector('[data-kind="new-count"]');
+      const courtesyInput = scope.querySelector('[data-kind="new-courtesy"]');
+
+      state.newCategoryDraft = {
+        count: countInput ? cleanNumericValue(countInput.value, 'numeric') : state.newCategoryDraft.count,
+        name: nameInput ? String(nameInput.value || '') : state.newCategoryDraft.name,
+        price: priceInput ? cleanNumericValue(priceInput.value, 'decimal') : state.newCategoryDraft.price,
+        courtesy: Boolean(courtesyInput && courtesyInput.checked)
+      };
+
+      if (state.newCategoryDraft.courtesy) state.newCategoryDraft.price = '0';
+    }
+
+    function addCategoryFromInlineInputs(sourceEl = document.activeElement) {
+      syncNewCategoryDraftFromRow(sourceEl);
+
+      const name = String(state.newCategoryDraft.name || '').trim();
+      const courtesy = Boolean(state.newCategoryDraft.courtesy);
+      const price = courtesy ? 0 : n(state.newCategoryDraft.price);
+      const count = Math.max(0, Math.floor(n(state.newCategoryDraft.count)));
+
+      if (!name) {
+        alert('Captura el tipo de acceso antes de agregarlo.');
+        const row = sourceEl && sourceEl.closest ? sourceEl.closest('.new-category-row') : null;
+        const nameInput = row ? row.querySelector('[data-kind="new-name"]') : document.querySelector('[data-kind="new-name"]');
+        if (nameInput) nameInput.focus();
+        return;
+      }
+
+      state.categories.push({ id: Date.now() + Math.random(), name, price, count, courtesy });
+      state.newCategoryDraft = { count: '', name: '', price: '', courtesy: false };
+      render();
+      setTimeout(() => {
+        const nextCount = document.querySelector('[data-kind="new-count"]');
+        if (nextCount) nextCount.focus();
+      }, 0);
+    }
+
+
+    function applyManualTableFieldValue(input) {
+      const kind = input.dataset.kind;
+
+      if (String(kind || '').startsWith('new-')) {
+        syncNewCategoryDraftFromRow(input);
+        return;
+      }
+
+      const id = n(input.dataset.id);
+      const item = state.categories.find(i => i.id === id);
+
+      if (item) {
+        if (kind === 'count') {
+          item.count = Math.max(0, Math.floor(n(input.value)));
+        } else if (kind === 'name') {
+          item.name = String(input.value || '').trim() || item.name;
+        } else if (kind === 'price') {
+          item.price = Math.max(0, n(input.value));
+        }
+      }
+    }
+
+    function getManualTableSelector() {
+      return [
+        '[data-kind="count"]',
+        '[data-kind="name"]',
+        '[data-kind="price"]',
+        '[data-kind="new-count"]',
+        '[data-kind="new-name"]',
+        '[data-kind="new-price"]',
+        '[data-kind="new-add"]'
+      ].join(',');
+    }
+
+    function getManualTableFields(scope) {
+      return Array.from(scope.querySelectorAll(getManualTableSelector()))
+        .filter(el => !el.disabled && el.offsetParent !== null);
+    }
+
+    function getManualTableKey(field) {
+      return field.dataset.id
+        ? `${field.dataset.id}:${field.dataset.kind}`
+        : `new:${field.dataset.kind}`;
+    }
+
+    function focusManualTableKey(nextKey) {
+      if (!nextKey) return;
+      setTimeout(() => {
+        const target = document.querySelector(`[data-manual-tab-key="${nextKey}"]`);
+        if (target) {
+          target.focus();
+          if (typeof target.select === 'function') target.select();
+        }
+      }, 0);
+    }
+
+    function moveManualTableFocus(field, reverse = false) {
+      const scope = field.closest('tbody') || field.closest('#categoriesMobile') || document;
+      applyManualTableFieldValue(field);
+
+      const currentFields = getManualTableFields(scope);
+      const currentIndex = currentFields.indexOf(field);
+      const nextIndex = reverse ? currentIndex - 1 : currentIndex + 1;
+      const nextField = currentFields[nextIndex];
+      const nextKey = nextField ? getManualTableKey(nextField) : null;
+
+      render();
+      focusManualTableKey(nextKey);
+    }
+
+    function configureManualTableTabOrder(scope) {
+      const fields = getManualTableFields(scope);
+
+      fields.forEach((field) => {
+        field.tabIndex = 0;
+        field.dataset.manualTabKey = getManualTableKey(field);
+
+        field.addEventListener('focus', () => {
+          if (field.tagName === 'INPUT' && typeof field.select === 'function') {
+            setTimeout(() => field.select(), 0);
+          }
+        });
+
+        field.addEventListener('keydown', (e) => {
+          if (e.key !== 'Tab') return;
+          e.preventDefault();
+          moveManualTableFocus(field, e.shiftKey);
+        });
+
+      });
+    }
+
+    function ensureManualContextMenu() {
+      let menu = document.getElementById('manualContextMenu');
+      if (menu) return menu;
+      menu = document.createElement('div');
+      menu.id = 'manualContextMenu';
+      menu.className = 'manual-context-menu';
+      menu.innerHTML = `
+        <div class="manual-context-hint">Opciones del renglón</div>
+        <button type="button" data-context-action="addPrompt">+ importe</button>
+        <button type="button" class="danger" data-context-action="delete">Eliminar localidad</button>
+      `;
+      document.body.appendChild(menu);
+      menu.addEventListener('click', (e) => {
+        const action = e.target.closest('[data-context-action]');
+        if (!action) return;
+        const id = n(menu.dataset.id);
+        hideManualContextMenu();
+        if (action.dataset.contextAction === 'addPrompt') promptAddToCount(id);
+        if (action.dataset.contextAction === 'delete') deleteCategoryById(id);
+      });
+      return menu;
+    }
+
+    function hideManualContextMenu() {
+      const menu = document.getElementById('manualContextMenu');
+      if (!menu) return;
+      menu.classList.remove('show');
+      menu.dataset.id = '';
+    }
+
+    function showManualContextMenu(id, clientX, clientY) {
+      const item = state.categories.find(i => i.id === id);
+      if (!item) return;
+      const menu = ensureManualContextMenu();
+      menu.dataset.id = id;
+      menu.classList.add('show');
+
+      const margin = 8;
+      const rect = menu.getBoundingClientRect();
+      const maxX = window.innerWidth - rect.width - margin;
+      const maxY = window.innerHeight - rect.height - margin;
+      menu.style.left = `${Math.max(margin, Math.min(clientX, maxX))}px`;
+      menu.style.top = `${Math.max(margin, Math.min(clientY, maxY))}px`;
+    }
+
+    async function deleteCategoryById(id) {
+      const item = state.categories.find(i => i.id === id);
+      if (!item) return;
+
+      const confirmed = await showWebMessage(
+        `¿Deseas eliminar la localidad${item.name ? ` "${item.name}"` : ''}?`,
+        {
+          title: 'Confirmar eliminación',
+          confirm: true,
+          okText: 'Eliminar',
+          cancelText: 'Cancelar',
+          danger: true,
+          autoClose: 0
+        }
+      );
+
+      if (!confirmed) return;
+      state.categories = state.categories.filter(i => i.id !== id);
+      if (state.selectedRowId === id) state.selectedRowId = null;
+      hideManualContextMenu();
+      markDataChanged();
+      render();
+    }
+
+    function bindManualRowContextMenus() {
+      document.querySelectorAll('.manual-category-row').forEach(row => {
+        const id = n(row.dataset.id);
+        let longPressTimer = null;
+        let touchStart = null;
+
+        row.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          showManualContextMenu(id, e.clientX, e.clientY);
+        });
+
+        row.addEventListener('touchstart', (e) => {
+          if (e.target.closest('input, textarea, select, button, label')) return;
+          const touch = e.touches && e.touches[0];
+          if (!touch) return;
+          touchStart = { x: touch.clientX, y: touch.clientY };
+          clearTimeout(longPressTimer);
+          longPressTimer = setTimeout(() => {
+            showManualContextMenu(id, touchStart.x, touchStart.y);
+          }, 650);
+        }, { passive: true });
+
+        row.addEventListener('touchmove', (e) => {
+          const touch = e.touches && e.touches[0];
+          if (!touch || !touchStart) return;
+          if (Math.abs(touch.clientX - touchStart.x) > 12 || Math.abs(touch.clientY - touchStart.y) > 12) {
+            clearTimeout(longPressTimer);
+          }
+        }, { passive: true });
+
+        ['touchend', 'touchcancel'].forEach(evt => {
+          row.addEventListener(evt, () => clearTimeout(longPressTimer), { passive: true });
+        });
+      });
+    }
+
+    function renderCategories() {
+      const calc = compute();
+      const tbody = $('categoriesTable');
+      const mobile = $('categoriesMobile');
+      tbody.innerHTML = '';
+      mobile.innerHTML = '';
+      const manualSortKey = state.manualSortKey || 'index';
+      const manualSortDir = state.manualSortDir === 'desc' ? 'desc' : 'asc';
+      updateManualSortIndicators();
+
+      calc.sortedCategories.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'manual-category-row';
+        tr.dataset.id = item.id;
+        tr.innerHTML = `
+          <td class="center">${calc.sortedCategories.findIndex(row => row.id === item.id) + 1}</td>
+          <td class="center"><input class="count-input" data-kind="count" data-id="${item.id}" type="text" inputmode="numeric" pattern="[0-9]*" min="0" step="1" value="${item.count}"></td>
+          <td><input data-kind="name" data-id="${item.id}" value="${escapeHtml(item.name)}"></td>
+          <td><input data-kind="price" data-id="${item.id}" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" min="0" value="${item.price}" ${item.courtesy ? 'disabled' : ''}></td>
+          <td class="right"><strong>${formatMoney(round2(n(item.price) * n(item.count)))}</strong></td>
+          <td><button type="button" tabindex="-1" class="small ${item.courtesy ? 'active' : ''}" data-kind="courtesy" data-id="${item.id}">${item.courtesy ? 'Sí' : 'No'}</button></td>
+        `;
+        tbody.appendChild(tr);
+
+        const card = document.createElement('div');
+        card.className = 'cat-mobile manual-category-row';
+        card.dataset.id = item.id;
+        card.innerHTML = `
+          <div class="row-between">
+            <input data-kind="name" data-id="${item.id}" value="${escapeHtml(item.name)}" style="border:0;padding:0;font-weight:600;">
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button type="button" tabindex="-1" class="small ${item.courtesy ? 'active' : ''}" data-kind="courtesy" data-id="${item.id}">${item.courtesy ? 'Cortesía' : 'De pago'}</button>
+            </div>
+          </div>
+          <div class="grid-4" style="align-items:center;">
+            <input class="count-input" data-kind="count" data-id="${item.id}" type="text" inputmode="numeric" pattern="[0-9]*" min="0" step="1" value="${item.count}">
+            <input data-kind="price" data-id="${item.id}" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" min="0" value="${item.price}" ${item.courtesy ? 'disabled' : ''}>
+
+          </div>
+
+          <div class="row-between note"><span>Subtotal</span><strong style="color:var(--text)">${formatMoney(round2(n(item.price) * n(item.count)))}</strong></div>
+        `;
+        mobile.appendChild(card);
+      });
+
+      const addTr = document.createElement('tr');
+      addTr.className = 'new-category-row';
+      const draft = state.newCategoryDraft || { count: '', name: '', price: '', courtesy: false };
+      addTr.innerHTML = `
+        <td class="center">Nuevo</td>
+        <td class="center"><input class="count-input" data-kind="new-count" type="text" inputmode="numeric" pattern="[0-9]*" value="${escapeHtml(draft.count)}" placeholder="0"></td>
+        <td><input data-kind="new-name" type="text" value="${escapeHtml(draft.name)}" placeholder="Nuevo tipo de acceso"></td>
+        <td><input data-kind="new-price" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" value="${escapeHtml(draft.price)}" placeholder="0.00" ${draft.courtesy ? 'disabled' : ''}></td>
+        <td class="right"><strong>${formatMoney(round2(n(draft.count) * n(draft.price)))}</strong></td>
+        <td class="center"><div style="display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;"><label class="note"><input data-kind="new-courtesy" type="checkbox" tabindex="-1" ${draft.courtesy ? 'checked' : ''}> Cortesía</label><button type="button" class="small active" data-kind="new-add">Agregar</button></div></td>
+      `;
+      tbody.appendChild(addTr);
+
+      const addMobile = document.createElement('div');
+      addMobile.className = 'cat-mobile new-category-row';
+      addMobile.innerHTML = `
+        <div class="section-title" style="font-size:14px;margin:0;">Nuevo tipo de acceso</div>
+        <div class="grid-3" style="align-items:center;">
+          <input class="count-input" data-kind="new-count" type="text" inputmode="numeric" pattern="[0-9]*" value="${escapeHtml(draft.count)}" placeholder="Entradas">
+          <input data-kind="new-name" type="text" value="${escapeHtml(draft.name)}" placeholder="Tipo">
+          <input data-kind="new-price" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" value="${escapeHtml(draft.price)}" placeholder="Precio" ${draft.courtesy ? 'disabled' : ''}>
+        </div>
+        <div class="row-between">
+          <label class="note"><input data-kind="new-courtesy" type="checkbox" tabindex="-1" ${draft.courtesy ? 'checked' : ''}> Cortesía</label>
+          <button type="button" class="small active" data-kind="new-add">Agregar</button>
+        </div>
+      `;
+      mobile.appendChild(addMobile);
+
+      configureAllNumericInputs(tbody);
+      configureAllNumericInputs(mobile);
+      configureManualTableTabOrder(tbody);
+      configureManualTableTabOrder(mobile);
+
+      document.querySelectorAll('[data-kind="name"]').forEach(el => {
+        el.onchange = (e) => {
+          const id = n(e.target.dataset.id);
+          const item = state.categories.find(i => i.id === id);
+          if (!item) return;
+          item.name = String(e.target.value || '').trim() || item.name;
+          render();
+        };
+      });
+
+      document.querySelectorAll('[data-kind="price"]').forEach(el => {
+        const applyPriceChange = (target) => {
+          const id = n(target.dataset.id);
+          const item = state.categories.find(i => i.id === id);
+          if (!item) return;
+          item.price = n(target.value);
+          render();
+        };
+        el.onchange = (e) => applyPriceChange(e.target);
+        el.onblur = (e) => applyPriceChange(e.target);
+        el.onkeydown = (e) => {
+          if (e.key === 'Enter') {
+            applyPriceChange(e.target);
+            e.target.blur();
+          }
+        };
+      });
+
+      document.querySelectorAll('[data-kind="count"]').forEach(el => {
+        const applyCountChange = (target) => {
+          updateCount(n(target.dataset.id), target.value);
+        };
+        el.onchange = (e) => applyCountChange(e.target);
+        el.onblur = (e) => applyCountChange(e.target);
+        el.onkeydown = (e) => {
+          if (e.key === 'Enter') {
+            applyCountChange(e.target);
+            e.target.blur();
+          }
+        };
+      });
+
+      document.querySelectorAll('[data-kind="new-courtesy"]').forEach(el => {
+        el.onchange = (e) => {
+          const row = e.target.closest('.new-category-row');
+          if (!row) return;
+          const price = row.querySelector('[data-kind="new-price"]');
+          if (price) {
+            price.disabled = e.target.checked;
+            if (e.target.checked) price.value = '0';
+          }
+          syncNewCategoryDraftFromRow(e.target);
+        };
+      });
+
+      document.querySelectorAll('[data-kind="new-count"], [data-kind="new-name"], [data-kind="new-price"]').forEach(el => {
+        el.oninput = (e) => syncNewCategoryDraftFromRow(e.currentTarget);
+        el.onblur = (e) => syncNewCategoryDraftFromRow(e.currentTarget);
+        el.onkeydown = (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            addCategoryFromInlineInputs(e.currentTarget);
+          }
+        };
+      });
+
+      document.querySelectorAll('[data-kind="new-add"]').forEach(el => {
+        el.onclick = (e) => addCategoryFromInlineInputs(e.currentTarget);
+        el.onkeydown = (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            addCategoryFromInlineInputs(e.currentTarget);
+          }
+        };
+      });
+
+      document.querySelectorAll('[data-kind="courtesy"]').forEach(el => {
+        el.onclick = (e) => {
+          e.stopPropagation();
+          const id = n(e.target.dataset.id);
+          const item = state.categories.find(i => i.id === id);
+          if (!item) return;
+          if (!confirm(`¿Deseas cambiar el tipo de acceso de "${item.name}" a ${item.courtesy ? 'de pago' : 'cortesía'}?`)) return;
+          item.courtesy = !item.courtesy;
+          if (item.courtesy) item.price = 0;
+          render();
+        };
+      });
+
+      bindManualRowContextMenus();
+
+    }
+
+    function renderConcentrados(calc) {
+      $('boletosTable').innerHTML = '';
+      if (!calc.boletosDetallados.length) {
+        $('boletosTable').innerHTML = '<tr><td colspan="5" class="center" style="color:var(--muted)">Aún no hay localidades con ingreso.</td></tr>';
+      } else {
+        calc.boletosDetallados.forEach((row, index) => {
+          const tr = document.createElement('tr');
+          tr.className = 'clickable' + (state.selectedRowId === row.itemId ? ' selected' : '');
+          tr.innerHTML = `
+            <td class="center">${index + 1}</td>
+            <td class="center">${row.cantidadAsistentes}</td>
+            <td>${escapeHtml(row.localidad)}</td>
+            <td class="right">${formatMoney(row.precioUnitario)}</td>
+            <td class="right"><strong>${formatMoney(row.multiplicacion)}</strong></td>
+          `;
+          tr.onclick = () => { state.selectedRowId = state.selectedRowId === row.itemId ? null : row.itemId; render(); };
+          $('boletosTable').appendChild(tr);
+        });
+      }
+
+      $('incomeTable').innerHTML = '';
+      if (!calc.incomeCategories.length) {
+        $('incomeTable').innerHTML = '<tr><td colspan="6" class="center" style="color:var(--muted)">Aún no hay localidades con ingreso.</td></tr>';
+      } else {
+        calc.incomeCategories.forEach((item, index) => {
+          const total = round2(n(item.price) * n(item.count));
+          const tr = document.createElement('tr');
+          tr.className = 'clickable' + (state.selectedRowId === item.id ? ' selected' : '');
+          tr.innerHTML = `
+            <td class="center">${index + 1}</td>
+            <td>${item.count}</td>
+            <td>${escapeHtml(item.name)}</td>
+            <td>${formatMoney(item.price)}</td>
+            <td style="max-width:320px;white-space:normal;">${moneyToWordsEs(item.price)}</td>
+            <td class="right"><strong>${formatMoney(total)}</strong></td>
+          `;
+          tr.onclick = () => { state.selectedRowId = state.selectedRowId === item.id ? null : item.id; render(); };
+          $('incomeTable').appendChild(tr);
+        });
+      }
+
+      $('stateConcentrado').innerHTML = `
+        <div class="row-between"><span>Identificación impuesto</span><strong>EST-001</strong></div>
+        <div class="row-between"><span>Factor multiplicador</span><strong>× ${n(state.stateIncomeFactor)}</strong></div>
+        <div class="row-between"><span>Base impuesto</span><strong>${formatMoney(calc.stateTaxBase)}</strong></div>
+        <div class="row-between"><span>Importe impuesto</span><strong>${formatMoney(calc.stateTaxAmount)}</strong></div>
+        <div class="row-between"><span>Importe honorarios</span><strong>${formatMoney(calc.totalStateInterventorFee)}</strong></div>
+        <div class="row-between"><span>Importe multa</span><strong>${formatMoney(state.stateFineAmount)}</strong></div>
+      `;
+
+      $('municipalConcentrado').innerHTML = `
+        <div class="row-between"><span>Identificación impuesto</span><strong>MUN-001</strong></div>
+        <div class="row-between"><span>Factor multiplicador</span><strong>× ${n(state.municipalIncomeFactor)}</strong></div>
+        <div class="row-between"><span>Base impuesto</span><strong>${formatMoney(calc.municipalTaxBase)}</strong></div>
+        <div class="row-between"><span>Importe impuesto</span><strong>${formatMoney(calc.municipalTaxAmount)}</strong></div>
+        <div class="row-between"><span>Importe honorarios</span><strong>${formatMoney(calc.totalMunicipalInterventorFee)}</strong></div>
+        <div class="row-between"><span>Importe multa</span><strong>${formatMoney(state.municipalFineAmount)}</strong></div>
+      `;
+
+      $('municipioResumen').innerHTML = `
+        <div class="section-title" style="font-size:13px;">Municipio</div>
+        <div class="row-between"><span>Impuestos</span><strong>${formatMoney(calc.municipalTaxAmount)}</strong></div>
+        <div class="row-between"><span>Honorarios</span><strong>${formatMoney(calc.totalMunicipalInterventorFee)}</strong></div>
+        <div class="row-between"><span>Multas</span><strong>${formatMoney(state.municipalFineAmount)}</strong></div>
+        <div class="row-between"><span><strong>Total municipio</strong></span><strong>${formatMoney(calc.municipalGovernmentTotal)}</strong></div>
+      `;
+
+      $('estadoResumen').innerHTML = `
+        <div class="section-title" style="font-size:13px;">Estado</div>
+        <div class="row-between"><span>Impuestos</span><strong>${formatMoney(calc.stateTaxAmount)}</strong></div>
+        <div class="row-between"><span>Honorarios</span><strong>${formatMoney(calc.totalStateInterventorFee)}</strong></div>
+        <div class="row-between"><span>Multas</span><strong>${formatMoney(state.stateFineAmount)}</strong></div>
+        <div class="row-between"><span><strong>Total estado</strong></span><strong>${formatMoney(calc.stateGovernmentTotal)}</strong></div>
+      `;
+
+      $('generalResumen').innerHTML = `
+        <div class="section-title" style="font-size:13px;">Total general</div>
+        <div class="row-between"><span>Total municipio</span><strong>${formatMoney(calc.municipalGovernmentTotal)}</strong></div>
+        <div class="row-between"><span>Total estado</span><strong>${formatMoney(calc.stateGovernmentTotal)}</strong></div>
+        <div class="row-between"><span><strong>Total contemplando todo</strong></span><strong style="font-size:20px;">${formatMoney(calc.totalCharges)}</strong></div>
+      `;
+    }
+
+
+
+    function bindCollapsiblePanels() {
+      document.querySelectorAll('[data-collapse-id]').forEach(panel => {
+        const id = String(panel.dataset.collapseId || '').trim();
+        if (!id) return;
+        const storageKey = `panelColapsable_${id}`;
+        const savedState = localStorage.getItem(storageKey);
+        if (savedState === 'cerrado') panel.removeAttribute('open');
+        if (savedState === 'abierto') panel.setAttribute('open', '');
+        panel.addEventListener('toggle', () => {
+          localStorage.setItem(storageKey, panel.open ? 'abierto' : 'cerrado');
+        });
+      });
+    }
+
+    function collapsePanelById(panelId) {
+      const cleanId = String(panelId || '').trim();
+      if (!cleanId) return;
+      const panel = document.querySelector(`[data-collapse-id="${cleanId}"]`);
+      if (!panel) return;
+      panel.removeAttribute('open');
+      localStorage.setItem(`panelColapsable_${cleanId}`, 'cerrado');
+    }
+
+
+    function render() {
+      const calc = compute();
+      $('sumTotalPersons').textContent = formatWholeNumber(calc.totalPersons);
+      $('sumPaying').textContent = formatWholeNumber(calc.payingPersons);
+      $('sumGross').textContent = formatMoney(calc.grossIncome);
+      $('sumCharges').textContent = formatMoney(calc.totalCharges);
+      $('courtesyPersonsBox').textContent = calc.courtesyPersons;
+      $('grossBox').textContent = formatMoney(calc.grossIncome);
+      $('avgPaidLocality').textContent = formatMoney(calc.averagePaidLocalityPrice);
+      $('courtesyValueState').textContent = formatMoney(calc.courtesyEstimatedValueForState);
+      $('stateBaseBefore').textContent = formatMoney(calc.stateBaseBeforeFactor);
+      $('stateTaxBase').textContent = formatMoney(calc.stateTaxBase);
+      $('municipalBaseBefore').textContent = formatMoney(calc.municipalBaseBeforeFactor);
+      $('municipalTaxBase').textContent = formatMoney(calc.municipalTaxBase);
+      $('grossIncomeCard').textContent = formatMoney(calc.grossIncome);
+      $('courtesyStateCard').textContent = formatMoney(calc.courtesyEstimatedValueForState);
+      $('viewContador').style.display = state.activeTab === 'contador' ? '' : 'none';
+      $('viewImpuestos').style.display = state.activeTab === 'impuestos' ? '' : 'none';
+      $('viewEventosWeb').style.display = state.activeTab === 'eventosWeb' ? '' : 'none';
+      $('tabContador').classList.toggle('active', state.activeTab === 'contador');
+      $('tabImpuestos').classList.toggle('active', state.activeTab === 'impuestos');
+      $('tabEventosWeb').classList.toggle('active', state.activeTab === 'eventosWeb');
+      $('subViewLocalidades').style.display = state.impuestosTab === 'localidades' ? '' : 'none';
+      $('subViewTotales').style.display = state.impuestosTab === 'totales' ? '' : 'none';
+      $('subLocalidades').classList.toggle('active', state.impuestosTab === 'localidades');
+      $('subTotales').classList.toggle('active', state.impuestosTab === 'totales');
+      renderCategories();
+      renderConcentrados(calc);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('manualContextMenu');
+      if (menu && !menu.contains(e.target)) hideManualContextMenu();
+      const webMenu = document.getElementById('webEventsContextMenu');
+      if (webMenu && !webMenu.contains(e.target)) hideWebEventsContextMenu();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        hideManualContextMenu();
+        hideWebEventsContextMenu();
+      }
+    });
+    window.addEventListener('scroll', () => {
+      hideManualContextMenu();
+      hideWebEventsContextMenu();
+    }, true);
+
+    $('tabContador').onclick = () => { state.activeTab = 'contador'; render(); };
+    $('tabImpuestos').onclick = () => { state.activeTab = 'impuestos'; render(); };
+    $('tabEventosWeb').onclick = () => { state.activeTab = 'eventosWeb'; render(); };
+    $('subLocalidades').onclick = () => { state.impuestosTab = 'localidades'; render(); };
+    $('subTotales').onclick = () => { state.impuestosTab = 'totales'; render(); };
+
+    bindTopInputs();
+    bindTaxInputs();
+    configureAllNumericInputs();
+    bindAutoSaveBeforeExit();
+    bindCollapsiblePanels();
+    updateMergeWebButtonState();
+    syncInputsFromState();
+    render();
+  </script>
 </body>
 </html>
