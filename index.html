@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="3; url=https://forms.gle/btvT7P5x8EVX4i2C9" />
+  <meta http-equiv="refresh" content="10; url=https://forms.gle/btvT7P5x8EVX4i2C9" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bienvenida - Examen CAM</title>
   <style>
@@ -12,66 +12,288 @@
 
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #e8e0c8, #d8ccb0);
-      color: #2f4a2f;
+      padding: 24px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #253622;
+      background:
+        linear-gradient(rgba(26, 42, 27, 0.45), rgba(26, 42, 27, 0.62)),
+        url("imagenes/picacho-grupo.jpeg") center / cover;
     }
 
     .contenedor {
-      width: 90%;
-      max-width: 600px;
-      background: #f7f1df;
-      border-radius: 18px;
-      padding: 36px 28px;
+      width: min(100%, 980px);
+      min-height: 560px;
+      display: grid;
+      grid-template-columns: 1.12fr 0.88fr;
+      overflow: hidden;
+      background: rgba(248, 243, 228, 0.95);
+      border: 1px solid rgba(205, 214, 184, 0.9);
+      border-radius: 24px;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(14px);
+    }
+
+    .carrusel {
+      position: relative;
+      min-height: 560px;
+      overflow: hidden;
+      background: #162418;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: scale(1.04);
+      animation: cambio 25s infinite;
+    }
+
+    .slide img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .slide::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.58)),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.18), transparent 45%);
+    }
+
+    .etiqueta {
+      position: absolute;
+      left: 26px;
+      right: 26px;
+      bottom: 26px;
+      z-index: 1;
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.35;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+    }
+
+    .indicadores {
+      position: absolute;
+      left: 26px;
+      bottom: 66px;
+      z-index: 2;
+      display: flex;
+      gap: 8px;
+    }
+
+    .indicadores span {
+      width: 38px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.42);
+      animation: indicador 25s infinite;
+    }
+
+    .contenido {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 46px 36px;
       text-align: center;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
-      border: 1px solid #b8c7a3;
     }
 
     .logo {
-      width: 180px;
+      width: 168px;
       max-width: 70%;
       height: auto;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.14));
     }
 
     h1 {
       margin: 0 0 14px;
-      font-size: 2rem;
-      color: #3d5a2a;
+      color: #345027;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.05;
     }
 
     p {
       margin: 10px 0;
+      color: #556b3f;
       font-size: 1.08rem;
       line-height: 1.6;
-      color: #556b3f;
     }
 
     .aviso {
-      margin-top: 22px;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 24px;
       padding: 12px 18px;
-      border-radius: 10px;
-      background: #e3ecd2;
       border: 1px solid #a9bb8c;
+      border-radius: 999px;
+      background: #e3ecd2;
       color: #486334;
-      font-weight: bold;
+      font-weight: 700;
+    }
+
+    .aviso::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #5f8b43;
+      box-shadow: 0 0 0 0 rgba(95, 139, 67, 0.55);
+      animation: pulso 1.4s infinite;
+    }
+
+    @keyframes cambio {
+      0%, 16% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      20%, 96% {
+        opacity: 0;
+        transform: scale(1.045);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes indicador {
+      0%, 16% {
+        background: #fff;
+      }
+
+      20%, 100% {
+        background: rgba(255, 255, 255, 0.42);
+      }
+    }
+
+    @keyframes pulso {
+      70% {
+        box-shadow: 0 0 0 9px rgba(95, 139, 67, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(95, 139, 67, 0);
+      }
+    }
+
+    @media (max-width: 780px) {
+      body {
+        align-items: stretch;
+        padding: 14px;
+      }
+
+      .contenedor {
+        min-height: 0;
+        grid-template-columns: 1fr;
+        border-radius: 20px;
+      }
+
+      .carrusel {
+        min-height: 360px;
+      }
+
+      .contenido {
+        padding: 32px 22px 36px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .carrusel {
+        min-height: 320px;
+      }
+
+      .etiqueta {
+        left: 18px;
+        right: 18px;
+        bottom: 20px;
+        font-size: 0.95rem;
+      }
+
+      .indicadores {
+        left: 18px;
+        bottom: 54px;
+      }
+
+      .indicadores span {
+        width: 30px;
+      }
+
+      p {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="contenedor">
-    <img src="logo CAM.png" alt="Logo del Club Alpino Mexicano" class="logo" />
-    <h1>Bienvenido al Examen</h1>
-    <p><strong>Club Alpino Mexicano, Delegación Baja California</strong></p>
-    <p>En breve se cargará el examen.</p>
-    <p>Será redirigido automáticamente al formulario en unos segundos.</p>
-    <div class="aviso">Redirigiendo...</div>
-  </div>
+  <main class="contenedor">
+    <section class="carrusel" aria-label="Fotos del Club Alpino Mexicano">
+      <div class="slide">
+        <img src="imagenes/picacho-grupo.jpeg" alt="Grupo del Club Alpino Mexicano en Picacho del Diablo" />
+        <div class="etiqueta">Picacho del Diablo - Club Alpino Mexicano</div>
+      </div>
+      <div class="slide">
+        <img src="imagenes/picacho-descanso.jpeg" alt="Montanista descansando en la cumbre" />
+        <div class="etiqueta">Preparación, ruta y montaña</div>
+      </div>
+      <div class="slide">
+        <img src="imagenes/picacho-cumbre.jpeg" alt="Montanistas mostrando registro en la cumbre de Picacho del Diablo" />
+        <div class="etiqueta">Experiencia en cumbre</div>
+      </div>
+      <div class="slide">
+        <img src="imagenes/picacho-casco-amarillo.jpg" alt="Montanista con casco amarillo descansando en Picacho del Diablo" />
+        <div class="etiqueta">Descanso en ruta</div>
+      </div>
+      <div class="slide">
+        <img src="imagenes/picacho-placa.jpg" alt="Montanista sosteniendo placa de Picacho Diablo" />
+        <div class="etiqueta">Picacho Diablo - 3,096 m</div>
+      </div>
+      <div class="indicadores" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </section>
+
+    <section class="contenido">
+      <img src="logo CAM.png" alt="Logo del Club Alpino Mexicano" class="logo" onerror="this.style.display='none'" />
+      <h1>Bienvenido al Examen</h1>
+      <p><strong>Club Alpino Mexicano, Delegación Baja California</strong></p>
+      <p>En breve se cargará el examen.</p>
+      <p>Será redirigido automáticamente al formulario en unos segundos.</p>
+      <div class="aviso">Redirigiendo...</div>
+    </section>
+  </main>
+  <script>
+    const carrusel = document.querySelector(".carrusel");
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const indicadores = Array.from(document.querySelectorAll(".indicadores span"));
+    const segundosPorFoto = 5;
+
+    slides
+      .sort(() => Math.random() - 0.5)
+      .forEach((slide, index) => {
+        slide.style.animationDelay = `${index * segundosPorFoto}s`;
+        carrusel.insertBefore(slide, document.querySelector(".indicadores"));
+      });
+
+    indicadores.forEach((indicador, index) => {
+      indicador.style.animationDelay = `${index * segundosPorFoto}s`;
+    });
+  </script>
 </body>
 </html>
