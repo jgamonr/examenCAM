@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="10; url=https://forms.gle/3bGkFesXcWdbgRg7A" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bienvenida - Examen CAM</title>
   <style>
@@ -152,6 +151,23 @@
       animation: pulso 1.4s infinite;
     }
 
+    .enlace-manual {
+      display: inline-block;
+      margin-top: 18px;
+      padding: 12px 22px;
+      border-radius: 999px;
+      background: #345027;
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .enlace-manual:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(52, 80, 39, 0.24);
+    }
+
     @keyframes cambio {
       0%, 16% {
         opacity: 1;
@@ -275,7 +291,12 @@
       <p><strong>Club Alpino Mexicano, Delegación Baja California</strong></p>
       <p>En breve se cargará el examen.</p>
       <p>Será redirigido automáticamente al formulario en unos segundos.</p>
-      <div class="aviso">Redirigiendo...</div>
+      <div class="aviso" id="estado-redireccion">Consultando examen vigente...</div>
+      <a
+        id="enlace-manual"
+        class="enlace-manual"
+        href="https://forms.gle/3bGkFesXcWdbgRg7A"
+      >Abrir examen ahora</a>
     </section>
   </main>
   <script>
@@ -294,6 +315,171 @@
     indicadores.forEach((indicador, index) => {
       indicador.style.animationDelay = `${index * segundosPorFoto}s`;
     });
+
+    /*
+      HOJA ESPERADA (primera pestaña o la indicada por gid):
+
+      clave        | enlace
+      evaluacion   | https://forms.gle/...
+      examen       | https://forms.gle/...
+
+      Pega en URL_HOJA el enlace de Google Sheets publicado en la web como CSV.
+      También se acepta el enlace normal de una hoja con acceso público.
+    */
+    const URL_HOJA = "PEGA_AQUI_EL_ENLACE_PUBLICO_DE_GOOGLE_SHEETS";
+    const CLAVE_ENLACE = "examen";
+    const ENLACE_RESPALDO = "https://forms.gle/3bGkFesXcWdbgRg7A";
+    const TIEMPO_REDIRECCION = 10000;
+
+    const enlaceManual = document.getElementById("enlace-manual");
+    const estadoRedireccion = document.getElementById("estado-redireccion");
+    const inicio = Date.now();
+
+    enlaceManual.href = ENLACE_RESPALDO;
+
+    function normalizarTexto(valor) {
+      return String(valor ?? "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function convertirHojaACsv(urlHoja) {
+      const valor = String(urlHoja || "").trim();
+
+      if (!valor || valor.includes("PEGA_AQUI")) {
+        return "";
+      }
+
+      const url = new URL(valor);
+
+      if (url.hostname === "docs.google.com") {
+        const publicada = url.pathname.match(/\/spreadsheets\/d\/e\/([^/]+)/);
+
+        if (publicada) {
+          url.pathname = url.pathname.replace(/\/pubhtml\/?$/, "/pub");
+          url.searchParams.set("output", "csv");
+          return url.toString();
+        }
+
+        const normal = url.pathname.match(/\/spreadsheets\/d\/([^/]+)/);
+
+        if (normal) {
+          const gidEnHash = url.hash.match(/gid=(\d+)/);
+          const gid = url.searchParams.get("gid") || gidEnHash?.[1] || "0";
+          return `https://docs.google.com/spreadsheets/d/${normal[1]}/export?format=csv&gid=${gid}`;
+        }
+      }
+
+      return valor;
+    }
+
+    function leerCsv(texto) {
+      const filas = [];
+      let fila = [];
+      let campo = "";
+      let entreComillas = false;
+
+      for (let i = 0; i < texto.length; i += 1) {
+        const caracter = texto[i];
+
+        if (caracter === '"') {
+          if (entreComillas && texto[i + 1] === '"') {
+            campo += '"';
+            i += 1;
+          } else {
+            entreComillas = !entreComillas;
+          }
+        } else if (caracter === "," && !entreComillas) {
+          fila.push(campo);
+          campo = "";
+        } else if ((caracter === "\n" || caracter === "\r") && !entreComillas) {
+          if (caracter === "\r" && texto[i + 1] === "\n") i += 1;
+          fila.push(campo);
+          if (fila.some((celda) => celda.trim() !== "")) filas.push(fila);
+          fila = [];
+          campo = "";
+        } else {
+          campo += caracter;
+        }
+      }
+
+      fila.push(campo);
+      if (fila.some((celda) => celda.trim() !== "")) filas.push(fila);
+      return filas;
+    }
+
+    function obtenerEnlace(textoCsv, claveBuscada) {
+      const filas = leerCsv(textoCsv);
+      if (!filas.length) throw new Error("La hoja está vacía.");
+
+      const encabezados = filas[0].map(normalizarTexto);
+      const nombresClave = ["clave", "pagina", "tipo", "nombre"];
+      const nombresEnlace = ["enlace", "link", "url", "formulario"];
+      let columnaClave = encabezados.findIndex((valor) => nombresClave.includes(valor));
+      let columnaEnlace = encabezados.findIndex((valor) => nombresEnlace.includes(valor));
+      let primeraFilaDatos = 1;
+
+      if (columnaClave < 0 || columnaEnlace < 0) {
+        columnaClave = 0;
+        columnaEnlace = 1;
+        primeraFilaDatos = 0;
+      }
+
+      const filaEncontrada = filas
+        .slice(primeraFilaDatos)
+        .find((filaActual) => normalizarTexto(filaActual[columnaClave]) === normalizarTexto(claveBuscada));
+
+      const enlace = filaEncontrada?.[columnaEnlace]?.trim();
+      if (!enlace) throw new Error(`No se encontró la clave "${claveBuscada}".`);
+
+      const url = new URL(enlace);
+      if (!/^https?:$/.test(url.protocol)) throw new Error("El enlace no es válido.");
+      return url.toString();
+    }
+
+    function programarRedireccion(enlace) {
+      enlaceManual.href = enlace;
+      const tiempoRestante = Math.max(500, TIEMPO_REDIRECCION - (Date.now() - inicio));
+
+      setTimeout(() => {
+        window.location.replace(enlace);
+      }, tiempoRestante);
+    }
+
+    async function cargarFormularioVigente() {
+      const urlCsv = convertirHojaACsv(URL_HOJA);
+
+      if (!urlCsv) {
+        estadoRedireccion.textContent = "Redirigiendo...";
+        programarRedireccion(ENLACE_RESPALDO);
+        return;
+      }
+
+      const controlador = new AbortController();
+      const limite = setTimeout(() => controlador.abort(), 5000);
+
+      try {
+        const respuesta = await fetch(urlCsv, {
+          cache: "no-store",
+          signal: controlador.signal
+        });
+
+        if (!respuesta.ok) throw new Error(`Respuesta ${respuesta.status}`);
+        const enlaceVigente = obtenerEnlace(await respuesta.text(), CLAVE_ENLACE);
+        estadoRedireccion.textContent = "Examen vigente localizado. Redirigiendo...";
+        programarRedireccion(enlaceVigente);
+      } catch (error) {
+        console.warn("No fue posible leer el enlace desde Google Sheets.", error);
+        estadoRedireccion.textContent = "Redirigiendo al examen disponible...";
+        programarRedireccion(ENLACE_RESPALDO);
+      } finally {
+        clearTimeout(limite);
+      }
+    }
+
+    cargarFormularioVigente();
   </script>
 </body>
 </html>
